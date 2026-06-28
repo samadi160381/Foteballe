@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GoalPulse – Live Scores Worldwide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #161a24;
+      --card:      #1c2132;
+      --border:    #252d42;
+      --live:      #e8303a;
+      --live-glow: rgba(232,48,58,.35);
+      --accent:    #00c2ff;
+      --green:     #00e676;
+      --muted:     #6b7592;
+      --text:      #e4e8f4;
+      --sub:       #9ca3be;
+      --radius:    10px;
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body:    'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    img { display: block; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,15,20,.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      display: flex; align-items: center; gap: 24px;
+      height: 56px;
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-size: 24px; font-weight: 800; letter-spacing: .5px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .logo span { color: var(--accent); }
+
+    /* Live ticker */
+    .ticker-wrap {
+      flex: 1; overflow: hidden;
+      mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+    }
+    .ticker {
+      display: flex; gap: 32px; white-space: nowrap;
+      animation: tick 40s linear infinite;
+    }
+    .ticker:hover { animation-play-state: paused; }
+    @keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .tick-item {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--sub);
+    }
+    .tick-item strong { color: var(--text); font-weight: 600; }
+    .tick-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--live); animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(.8);} }
+
+    .hdr-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+    .search-box {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 12px;
+      transition: border-color .2s;
+    }
+    .search-box:focus-within { border-color: var(--accent); }
+    .search-box input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-size: 13px; width: 130px;
+    }
+    .search-box input::placeholder { color: var(--muted); }
+    .search-icon { color: var(--muted); font-size: 14px; }
+
+    .btn-notify {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--card); border: 1px solid var(--border);
+      display: grid; place-items: center;
+      font-size: 16px; transition: border-color .2s;
+    }
+    .btn-notify:hover { border-color: var(--accent); }
+
+    /* ── LAYOUT ── */
+    .page { display: flex; gap: 0; max-width: 1440px; margin: 0 auto; }
+
+    /* ── SIDEBAR ── */
+    aside {
+      width: 220px; flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+      position: sticky; top: 56px; height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+      color: var(--muted); text-transform: uppercase;
+      padding: 8px 16px 4px;
+    }
+
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; border-radius: 0;
+      transition: background .15s;
+      cursor: pointer; font-size: 13px;
+    }
+    .sidebar-item:hover, .sidebar-item.active {
+      background: var(--card);
+    }
+    .sidebar-item.active { border-left: 3px solid var(--accent); padding-left: 13px; }
+    .sidebar-item .flag { font-size: 18px; }
+    .sidebar-item .count {
+      margin-left: auto; font-size: 11px; font-weight: 600;
+      background: var(--live); color: #fff;
+      padding: 1px 6px; border-radius: 10px;
+    }
+    .sidebar-item .count.gray { background: var(--border); color: var(--muted); }
+
+    /* ── MAIN ── */
+    main { flex: 1; padding: 20px; min-width: 0; }
+
+    /* ── NAV TABS ── */
+    .nav-tabs {
+      display: flex; gap: 4px; margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      padding: 8px 16px; font-size: 13px; font-weight: 500;
+      color: var(--sub); border-bottom: 2px solid transparent;
+      margin-bottom: -1px; transition: color .15s, border-color .15s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── DATE STRIP ── */
+    .date-strip {
+      display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .date-strip::-webkit-scrollbar { display: none; }
+
+    .date-pill {
+      flex-shrink: 0; text-align: center;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 8px 14px;
+      cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .date-pill:hover { border-color: var(--accent); }
+    .date-pill.active { background: var(--accent); border-color: var(--accent); color: #000; }
+    .date-pill .day { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; }
+    .date-pill .num { font-family: var(--font-display); font-size: 22px; font-weight: 800; line-height: 1.1; }
+
+    /* ── LEAGUE BLOCK ── */
+    .league-block { margin-bottom: 16px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+
+    .league-header {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); padding: 10px 14px;
+      cursor: pointer;
+    }
+    .league-header .lh-flag { font-size: 20px; }
+    .league-header .lh-name {
+      font-family: var(--font-display); font-size: 16px; font-weight: 700; letter-spacing: .3px;
+    }
+    .league-header .lh-country { font-size: 11px; color: var(--muted); }
+    .league-header .lh-count { margin-left: auto; font-size: 11px; color: var(--muted); }
+    .league-header .lh-chev { margin-left: 8px; color: var(--muted); font-size: 12px; transition: transform .2s; }
+    .league-block.collapsed .lh-chev { transform: rotate(-90deg); }
+    .league-block.collapsed .league-matches { display: none; }
+
+    /* ── MATCH ROW ── */
+    .match-row {
+      display: grid;
+      grid-template-columns: 60px 1fr auto 1fr auto;
+      align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: var(--card); border-top: 1px solid var(--border);
+      transition: background .12s;
+      cursor: pointer;
+    }
+    .match-row:hover { background: #202637; }
+
+    .match-time {
+      text-align: center; font-size: 12px; line-height: 1.3;
+    }
+    .match-time .status {
+      font-weight: 700; font-size: 11px;
+      padding: 2px 6px; border-radius: 4px;
+      display: inline-block; margin-bottom: 2px;
+    }
+    .status.live { background: var(--live); color: #fff; animation: liveblink 1.8s ease-in-out infinite; }
+    @keyframes liveblink { 0%,100%{opacity:1} 50%{opacity:.7} }
+    .status.ft { background: var(--border); color: var(--muted); }
+    .status.ns { background: transparent; color: var(--sub); border: 1px solid var(--border); }
+    .status.ht { background: #f59e0b; color: #000; }
+    .match-time .minute { font-size: 11px; color: var(--live); font-weight: 600; }
+
+    .team {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500;
+    }
+    .team.away { flex-direction: row-reverse; text-align: right; }
+    .team-logo {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--border); display: grid; place-items: center;
+      font-size: 13px; flex-shrink: 0;
+    }
+
+    .score-box {
+      display: flex; gap: 6px; align-items: center;
+      font-family: var(--font-display); font-size: 26px; font-weight: 800;
+      min-width: 60px; justify-content: center;
+    }
+    .score-box .dash { color: var(--muted); font-size: 20px; }
+    .score-box .s { line-height: 1; }
+    .score-box .s.winner { color: var(--green); }
+
+    .match-actions { display: flex; gap: 4px; }
+    .match-action-btn {
+      font-size: 10px; padding: 3px 7px; border-radius: 4px;
+      border: 1px solid var(--border); color: var(--sub);
+      transition: border-color .15s, color .15s;
+    }
+    .match-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel { width: 300px; flex-shrink: 0; padding: 20px 16px; border-left: 1px solid var(--border); }
+
+    /* ── FEATURED / BANNER ── */
+    .featured-match {
+      background: linear-gradient(135deg, #0f1b36 0%, #1a0f2e 100%);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 16px; position: relative; overflow: hidden;
+    }
+    .featured-match::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 70% 30%, rgba(0,194,255,.12), transparent 60%);
+    }
+    .featured-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 10px;
+    }
+    .feat-teams {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .feat-team { text-align: center; flex: 1; }
+    .feat-badge { font-size: 36px; margin: 0 auto 4px; }
+    .feat-name { font-size: 12px; font-weight: 600; }
+    .feat-score {
+      font-family: var(--font-display); font-size: 40px; font-weight: 800;
+      color: var(--text); text-align: center; line-height: 1;
+      padding: 0 8px;
+    }
+    .feat-meta { text-align: center; margin-top: 10px; font-size: 11px; color: var(--muted); }
+    .feat-live { color: var(--live); font-weight: 700; }
+
+    /* ── STANDINGS WIDGET ── */
+    .widget { margin-bottom: 16px; }
+    .widget-title {
+      font-family: var(--font-display); font-size: 16px; font-weight: 700;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .widget-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+    .standings-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .standings-table th { color: var(--muted); font-weight: 500; padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--border); }
+    .standings-table th:first-child, .standings-table th:nth-child(2) { text-align: left; }
+    .standings-table td { padding: 7px 6px; border-bottom: 1px solid rgba(37,45,66,.6); text-align: right; }
+    .standings-table td:nth-child(2) { text-align: left; font-weight: 500; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .standings-table td:first-child { color: var(--muted); }
+    .standings-table .pts { font-weight: 700; color: var(--text); }
+    .standings-table tr.highlight td { background: rgba(0,194,255,.06); }
+    .form-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
+    .form-dot.w { background: var(--green); }
+    .form-dot.d { background: #f59e0b; }
+    .form-dot.l { background: var(--live); }
+
+    /* ── TOP SCORERS ── */
+    .scorer-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(37,45,66,.6); }
+    .scorer-num { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--muted); width: 20px; text-align: center; }
+    .scorer-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--border); display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+    .scorer-info { flex: 1; }
+    .scorer-name { font-size: 12px; font-weight: 600; }
+    .scorer-team { font-size: 11px; color: var(--muted); }
+    .scorer-goals { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 20px;
+      text-align: center; color: var(--muted); font-size: 12px;
+      margin-top: 40px;
+    }
+    footer a { color: var(--accent); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) { .right-panel { display: none; } }
+    @media (max-width: 800px) { aside { display: none; } }
+    @media (max-width: 600px) {
+      header { padding: 0 12px; }
+      .search-box { display: none; }
+      main { padding: 12px; }
+      .match-row { grid-template-columns: 50px 1fr auto 1fr; }
+      .match-actions { display: none; }
+      .score-box { font-size: 22px; min-width: 48px; }
+    }
+
+    /* ── LOADING SHIMMER ── */
+    @keyframes shimmer { from{background-position:-400px 0} to{background-position:400px 0} }
+    .shimmer {
+      background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite linear;
+      border-radius: 4px; height: 14px;
+    }
+
+    /* ── LIVE BADGE on page ── */
+    .live-count-badge {
+      background: var(--live); color: #fff; font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px; margin-left: 8px;
+    }
+
+    /* ── TOP STRIP ── */
+    .top-strip {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .top-strip h1 {
+      font-family: var(--font-display); font-size: 24px; font-weight: 800;
+    }
+
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); color: var(--sub);
+      transition: all .15s; cursor: pointer;
+    }
+    .chip:hover, .chip.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header>
+  <div class="logo">Goal<span>Pulse</span></div>
+
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker"></div>
+  </div>
+
+  <div class="hdr-right">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search team or league…" />
+    </div>
+    <button class="btn-notify" title="Notifications">🔔</button>
+  </div>
+</header>
+
+<!-- ══════════════ PAGE LAYOUT ══════════════ -->
+<div class="page">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Quick Filters</div>
+      <div class="sidebar-item active" onclick="filterLeague('all')">
+        <span class="flag">⚽</span> All Matches <span class="count" id="liveTotal">0</span>
+      </div>
+      <div class="sidebar-item" onclick="filterLeague('live')">
+        <span class="flag">🔴</span> Live Now <span class="count" id="liveSidebar">0</span>
+      </div>
+      <div class="sidebar-item" onclick="filterLeague('favorites')">
+        <span class="flag">⭐</span> Favorites
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Top Leagues</div>
+      <div class="sidebar-item" onclick="filterLeague('premierleague')"><span class="flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span> Premier League<span class="count gray">10</span></div>
+      <div class="sidebar-item" onclick="filterLeague('laliga')"><span class="flag">🇪🇸</span> La Liga<span class="count gray">10</span></div>
+      <div class="sidebar-item" onclick="filterLeague('bundesliga')"><span class="flag">🇩🇪</span> Bundesliga<span class="count gray">9</span></div>
+      <div class="sidebar-item" onclick="filterLeague('seriea')"><span class="flag">🇮🇹</span> Serie A<span class="count gray">10</span></div>
+      <div class="sidebar-item" onclick="filterLeague('ligue1')"><span class="flag">🇫🇷</span> Ligue 1<span class="count gray">10</span></div>
+      <div class="sidebar-item" onclick="filterLeague('ucl')"><span class="flag">🇪🇺</span> Champions League<span class="count gray">8</span></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">More Sports</div>
+      <div class="sidebar-item"><span class="flag">🏀</span> Basketball</div>
+      <div class="sidebar-item"><span class="flag">🎾</span> Tennis</div>
+      <div class="sidebar-item"><span class="flag">🏒</span> Hockey</div>
+      <div class="sidebar-item"><span class="flag">🏈</span> American Football</div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main>
+    <div class="top-strip">
+      <h1>Live Scores <span class="live-count-badge" id="topLiveCount">0 Live</span></h1>
+      <div class="filter-chips">
+        <div class="chip active" onclick="setChip(this,'all')">All</div>
+        <div class="chip" onclick="setChip(this,'live')">🔴 Live</div>
+        <div class="chip" onclick="setChip(this,'finished')">Finished</div>
+        <div class="chip" onclick="setChip(this,'upcoming')">Upcoming</div>
+      </div>
+    </div>
+
+    <!-- Date Strip -->
+    <div class="date-strip" id="dateStrip"></div>
+
+    <!-- Nav Tabs -->
+    <div class="nav-tabs">
+      <button class="tab active">Football</button>
+      <button class="tab">Basketball</button>
+      <button class="tab">Tennis</button>
+      <button class="tab">Hockey</button>
+    </div>
+
+    <!-- Matches container -->
+    <div id="matchesContainer"></div>
+  </main>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="right-panel">
+
+    <!-- Featured Match -->
+    <div class="featured-match">
+      <div class="featured-label">⚡ Match of the Day</div>
+      <div class="feat-teams">
+        <div class="feat-team">
+          <div class="feat-badge">🔴</div>
+          <div class="feat-name">Man United</div>
+        </div>
+        <div class="feat-score" id="featScore">2 – 1</div>
+        <div class="feat-team">
+          <div class="feat-badge">🔵</div>
+          <div class="feat-name">Man City</div>
+        </div>
+      </div>
+      <div class="feat-meta">
+        <span class="feat-live">● LIVE</span> &nbsp;67' — Premier League
+      </div>
+    </div>
+
+    <!-- Standings Widget -->
+    <div class="widget">
+      <div class="widget-title"><span class="dot"></span> PL Standings</div>
+      <table class="standings-table">
+        <thead>
+          <tr><th>#</th><th>Team</th><th>P</th><th>GD</th><th>Pts</th></tr>
+        </thead>
+        <tbody id="standingsBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Top Scorers -->
+    <div class="widget">
+      <div class="widget-title"><span class="dot"></span> Top Scorers</div>
+      <div id="scorersList"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2026 GoalPulse — Live football scores from around the world &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a></p>
+</footer>
+
+<!-- ══════════════ SCRIPT ══════════════ -->
+<script>
+/* ── DATA ── */
+const LEAGUES = [
+  {
+    id: 'premierleague', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', name: 'Premier League', country: 'England',
+    matches: [
+      { id:1, home:'Manchester United', hlogo:'🔴', away:'Manchester City', alogo:'🔵', hs:2, as:1, status:'live', min:67, hWin:true },
+      { id:2, home:'Arsenal', hlogo:'🔴', away:'Chelsea', alogo:'🔵', hs:1, as:1, status:'live', min:34 },
+      { id:3, home:'Liverpool', hlogo:'🔴', away:'Tottenham', alogo:'⚪', hs:3, as:0, status:'ft', hWin:true },
+      { id:4, home:'Newcastle', hlogo:'⚫', away:'Aston Villa', alogo:'🟣', hs:null, as:null, status:'ns', time:'20:00' },
+    ]
+  },
+  {
+    id: 'laliga', flag: '🇪🇸', name: 'La Liga', country: 'Spain',
+    matches: [
+      { id:5, home:'Real Madrid', hlogo:'⚪', away:'Barcelona', alogo:'🔵', hs:1, as:2, status:'live', min:55, aWin:true },
+      { id:6, home:'Atletico Madrid', hlogo:'🔴', away:'Sevilla', alogo:'⚪', hs:0, as:0, status:'ht' },
+      { id:7, home:'Valencia', hlogo:'🟡', away:'Real Betis', alogo:'🟢', hs:null, as:null, status:'ns', time:'21:00' },
+    ]
+  },
+  {
+    id: 'bundesliga', flag: '🇩🇪', name: 'Bundesliga', country: 'Germany',
+    matches: [
+      { id:8, home:'Bayern Munich', hlogo:'🔴', away:'Borussia Dortmund', alogo:'🟡', hs:2, as:2, status:'ft' },
+      { id:9, home:'Bayer Leverkusen', hlogo:'🔴', away:'RB Leipzig', alogo:'🔴', hs:3, as:1, status:'ft', hWin:true },
+    ]
+  },
+  {
+    id: 'seriea', flag: '🇮🇹', name: 'Serie A', country: 'Italy',
+    matches: [
+      { id:10, home:'Juventus', hlogo:'⚫', away:'AC Milan', alogo:'🔴', hs:1, as:0, status:'live', min:78, hWin:true },
+      { id:11, home:'Inter Milan', hlogo:'🔵', away:'Napoli', alogo:'🔵', hs:2, as:2, status:'live', min:52 },
+    ]
+  },
+  {
+    id: 'ucl', flag: '🇪🇺', name: 'Champions League', country: 'UEFA',
+    matches: [
+      { id:12, home:'PSG', hlogo:'🔵', away:'Real Madrid', alogo:'⚪', hs:0, as:1, status:'live', min:88, aWin:true },
+      { id:13, home:'Bayern Munich', hlogo:'🔴', away:'Manchester City', alogo:'🔵', hs:null, as:null, status:'ns', time:'20:45' },
+    ]
+  },
+  {
+    id: 'ligue1', flag: '🇫🇷', name: 'Ligue 1', country: 'France',
+    matches: [
+      { id:14, home:'Paris Saint-Germain', hlogo:'🔵', away:'Marseille', alogo:'⚪', hs:4, as:1, status:'ft', hWin:true },
+      { id:15, home:'Lyon', hlogo:'🔴', away:'Monaco', alogo:'🔴', hs:2, as:3, status:'ft', aWin:true },
+    ]
+  },
+];
+
+const STANDINGS = [
+  { pos:1, team:'Man City', p:30, gd:'+40', pts:72, form:['w','w','d','w','w'] },
+  { pos:2, team:'Arsenal', p:30, gd:'+35', pts:68, form:['w','w','w','l','w'], hl:true },
+  { pos:3, team:'Liverpool', p:30, gd:'+30', pts:65, form:['d','w','w','w','d'] },
+  { pos:4, team:'Man Utd', p:30, gd:'+12', pts:56, form:['w','l','w','d','w'] },
+  { pos:5, team:'Tottenham', p:30, gd:'+8', pts:52, form:['l','l','w','w','l'] },
+  { pos:6, team:'Chelsea', p:30, gd:'+5', pts:48, form:['d','w','d','l','d'] },
+];
+
+const SCORERS = [
+  { rank:1, name:'Erling Haaland', team:'Man City', flag:'🇳🇴', goals:27 },
+  { rank:2, name:'Mohamed Salah', team:'Liverpool', flag:'🇪🇬', goals:23 },
+  { rank:3, name:'Harry Kane', team:'Bayern', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', goals:22 },
+  { rank:4, name:'Kylian Mbappé', team:'Real Madrid', flag:'🇫🇷', goals:20 },
+  { rank:5, name:'Vinicius Jr', team:'Real Madrid', flag:'🇧🇷', goals:18 },
+];
+
+/* ── TICKER ── */
+function buildTicker() {
+  const items = LEAGUES.flatMap(l => l.matches.filter(m => m.status === 'live').map(m =>
+    `<span class="tick-item"><span class="tick-dot"></span><strong>${m.hlogo} ${m.home}</strong>&nbsp;<strong>${m.hs}–${m.as}</strong>&nbsp;<strong>${m.away} ${m.alogo}</strong><em style="color:var(--live);font-size:11px;font-style:normal">&nbsp;${m.min}'</em></span>`
+  ));
+  const doubled = [...items, ...items].join('');
+  document.getElementById('ticker').innerHTML = doubled || '<span class="tick-item">No live matches right now — check back soon</span>';
+}
+
+/* ── DATE STRIP ── */
+function buildDateStrip() {
+  const strip = document.getElementById('dateStrip');
+  const now = new Date();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  strip.innerHTML = '';
+  for (let i = -3; i <= 4; i++) {
+    const d = new Date(now); d.setDate(now.getDate() + i);
+    const pill = document.createElement('div');
+    pill.className = 'date-pill' + (i === 0 ? ' active' : '');
+    pill.innerHTML = `<div class="day">${i === 0 ? 'Today' : days[d.getDay()]}</div><div class="num">${d.getDate()}</div>`;
+    pill.onclick = () => { document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); };
+    strip.appendChild(pill);
+  }
+}
+
+/* ── MATCHES ── */
+function statusHTML(m) {
+  if (m.status === 'live') return `<div class="status live">LIVE</div><div class="minute">${m.min}'</div>`;
+  if (m.status === 'ft') return `<div class="status ft">FT</div>`;
+  if (m.status === 'ht') return `<div class="status ht">HT</div>`;
+  if (m.status === 'ns') return `<div class="status ns">${m.time || '--:--'}</div>`;
+  return '';
+}
+
+function scoreHTML(m) {
+  if (m.hs === null) return `<div class="score-box"><span class="dash">vs</span></div>`;
+  return `<div class="score-box">
+    <span class="s ${m.hWin ? 'winner' : ''}">${m.hs}</span>
+    <span class="dash">–</span>
+    <span class="s ${m.aWin ? 'winner' : ''}">${m.as}</span>
+  </div>`;
+}
+
+function buildMatches(filterStatus, filterLeagueId) {
+  const container = document.getElementById('matchesContainer');
+  container.innerHTML = '';
+  let liveCount = 0;
+
+  LEAGUES.forEach(league => {
+    if (filterLeagueId && filterLeagueId !== 'all' && filterLeagueId !== 'live' && filterLeagueId !== league.id) return;
+
+    let matches = league.matches;
+    if (filterStatus && filterStatus !== 'all') matches = matches.filter(m => {
+      if (filterStatus === 'live') return m.status === 'live';
+      if (filterStatus === 'finished') return m.status === 'ft';
+      if (filterStatus === 'upcoming') return m.status === 'ns';
+      return true;
+    });
+    if (filterLeagueId === 'live') matches = matches.filter(m => m.status === 'live');
+
+    if (!matches.length) return;
+    liveCount += matches.filter(m => m.status === 'live').length;
+
+    const block = document.createElement('div');
+    block.className = 'league-block';
+    block.innerHTML = `
+      <div class="league-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span class="lh-flag">${league.flag}</span>
+        <div>
+          <div class="lh-name">${league.name}</div>
+          <div class="lh-country">${league.country}</div>
+        </div>
+        <span class="lh-count">${matches.length} match${matches.length > 1 ? 'es' : ''}</span>
+        <span class="lh-chev">▼</span>
+      </div>
+      <div class="league-matches">${matches.map(m => `
+        <div class="match-row" onclick="openMatch(${m.id})">
+          <div class="match-time">${statusHTML(m)}</div>
+          <div class="team home">
+            <div class="team-logo">${m.hlogo}</div>
+            <span>${m.home}</span>
+          </div>
+          ${scoreHTML(m)}
+          <div class="team away">
+            <div class="team-logo">${m.alogo}</div>
+            <span>${m.away}</span>
+          </div>
+          <div class="match-actions">
+            <button class="match-action-btn">Stats</button>
+            <button class="match-action-btn">H2H</button>
+          </div>
+        </div>`).join('')}
+      </div>`;
+    container.appendChild(block);
+  });
+
+  // update live counters
+  document.getElementById('topLiveCount').textContent = liveCount + ' Live';
+  document.getElementById('liveSidebar').textContent = liveCount;
+  document.getElementById('liveTotal').textContent = liveCount;
+}
+
+/* ── STANDINGS ── */
+function buildStandings() {
+  const body = document.getElementById('standingsBody');
+  body.innerHTML = STANDINGS.map(s => `
+    <tr class="${s.hl ? 'highlight' : ''}">
+      <td>${s.pos}</td>
+      <td>${s.team}</td>
+      <td>${s.p}</td>
+      <td>${s.gd}</td>
+      <td class="pts">${s.pts}</td>
+    </tr>`).join('');
+}
+
+/* ── SCORERS ── */
+function buildScorers() {
+  document.getElementById('scorersList').innerHTML = SCORERS.map(s => `
+    <div class="scorer-row">
+      <div class="scorer-num">${s.rank}</div>
+      <div class="scorer-avatar">${s.flag}</div>
+      <div class="scorer-info">
+        <div class="scorer-name">${s.name}</div>
+        <div class="scorer-team">${s.team}</div>
+      </div>
+      <div class="scorer-goals">${s.goals}</div>
+    </div>`).join('');
+}
+
+/* ── FILTER CHIPS ── */
+let currentChip = 'all';
+let currentLeague = 'all';
+function setChip(el, val) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentChip = val;
+  buildMatches(currentChip, currentLeague);
+}
+function filterLeague(id) {
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  currentLeague = id;
+  buildMatches(currentChip, currentLeague);
+}
+
+/* ── LIVE CLOCK ── */
+function tickMinutes() {
+  LEAGUES.forEach(l => l.matches.forEach(m => { if (m.status === 'live' && m.min < 90) m.min++; }));
+  buildMatches(currentChip, currentLeague);
+  buildTicker();
+}
+
+function openMatch(id) {
+  // placeholder — in a real app this opens match detail
+  console.log('Open match', id);
+}
+
+/* ── FEATURED SCORE ANIMATION ── */
+let featGoals = { h: 2, a: 1 };
+function animFeat() {
+  setInterval(() => {
+    if (Math.random() < .05) {
+      featGoals.h++;
+      document.getElementById('featScore').textContent = `${featGoals.h} – ${featGoals.a}`;
+      document.getElementById('featScore').style.color = 'var(--live)';
+      setTimeout(() => document.getElementById('featScore').style.color = '', 1200);
+    }
+  }, 3000);
+}
+
+/* ── INIT ── */
+buildTicker();
+buildDateStrip();
+buildMatches('all', 'all');
+buildStandings();
+buildScorers();
+animFeat();
+setInterval(tickMinutes, 60000);  // advance minutes every real minute
+</script>
+</body>
+</html>
