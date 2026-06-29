@@ -772,17 +772,23 @@ const panel = document.getElementById('panel-overview');
 const home = m.homeTeam, away = m.awayTeam;
 const mainRef = (m.referees||[]).find(r=>r.type==='REFEREE') || (m.referees||[])[0];
 
-// Match Info card — only real fields, each row omitted if the API didn't supply it
+// Match Info card — only real fields, each row omitted if the API didn't supply it.
+// match.venue (the fixture's actual venue) is preferred; if absent we lazily fetch
+// the home team's registered home ground as a real-data fallback (see below).
 const infoRows = [
-m.venue && {icon:'🏟️', label:'Stadium', val:m.venue},
+{icon:'🏟️', label:'Stadium', val: m.venue || '__PENDING__', _stadium:true},
 mainRef?.name && {icon:'🟨', label:'Referee', val:mainRef.name},
 m.attendance && {icon:'👥', label:'Attendance', val:m.attendance.toLocaleString()},
 m.utcDate && {icon:'📅', label:'Date', val:new Date(m.utcDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})},
 m.matchday && {icon:'🔢', label:'Matchday', val:m.matchday},
 ].filter(Boolean);
 
-const infoHTML = infoRows.length
-? infoRows.map(r=>`<div class="md-info-row"><span class="md-info-icon">${r.icon}</span><div><div class="md-info-label">${r.label}</div><div class="md-info-val">${r.val}</div></div></div>`).join('')
+// Drop the stadium placeholder row entirely if we have neither a match venue
+// nor a home team id to look one up with — nothing to show or fetch.
+const finalRows = infoRows.filter(r => !(r._stadium && r.val==='__PENDING__' && !home?.id));
+
+const infoHTML = finalRows.length
+? finalRows.map(r=>`<div class="md-info-row" ${r._stadium?'id="md-stadium-row"':''}><span class="md-info-icon">${r.icon}</span><div><div class="md-info-label">${r.label}</div><div class="md-info-val">${r.val==='__PENDING__'?'<span style="color:var(--muted)">Loading…</span>':r.val}</div></div></div>`).join('')
 : `<div class="md-no-stats-note">No match info available for this fixture.</div>`;
 
 // Team Statistics preview — first 6 rows, with a link to the full Stats tab
@@ -816,6 +822,25 @@ ${eventsHTML}
 </div>
 </div>
 </div>`;
+
+// If the fixture itself didn't report a venue, fetch the home team's registered
+// home ground in the background and patch the Stadium row in once it arrives.
+// This is a real extra API call (the slim team object on a match never includes
+// venue), so we only make it when we actually need to and only once per open.
+if (!m.venue && home?.id) {
+apiFetch(`teams/${home.id}`).then(teamData => {
+const row = document.getElementById('md-stadium-row');
+if (!row || mdCurrentMatch?.id !== m.id) return; // overlay closed or switched matches
+if (teamData?.venue) {
+row.querySelector('.md-info-val').textContent = teamData.venue;
+} else {
+row.remove(); // team has no registered venue either — nothing real to show
+}
+}).catch(() => {
+const row = document.getElementById('md-stadium-row');
+if (row) row.remove();
+});
+}
 }
 
 function renderMdSquads(m) {
