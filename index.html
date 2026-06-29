@@ -831,14 +831,21 @@ if (!m.venue && home?.id) {
 apiFetch(`teams/${home.id}`).then(teamData => {
 const row = document.getElementById('md-stadium-row');
 if (!row || mdCurrentMatch?.id !== m.id) return; // overlay closed or switched matches
+const valEl = row.querySelector('.md-info-val');
 if (teamData?.venue) {
-row.querySelector('.md-info-val').textContent = teamData.venue;
+valEl.textContent = teamData.venue;
 } else {
-row.remove(); // team has no registered venue either — nothing real to show
+// Successful response, but this team genuinely has no venue on file — drop the row.
+row.remove();
 }
 }).catch(() => {
+// The lookup failed (rate limit, network hiccup, etc). This does NOT mean no venue
+// exists — just that we couldn't confirm it. Never delete the row on failure; that's
+// what was causing it to flash and vanish. Leave a calm, permanent fallback instead.
 const row = document.getElementById('md-stadium-row');
-if (row) row.remove();
+if (!row || mdCurrentMatch?.id !== m.id) return;
+const valEl = row.querySelector('.md-info-val');
+valEl.innerHTML = '<span style="color:var(--muted)">Not available</span>';
 });
 }
 }
