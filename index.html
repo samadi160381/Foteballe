@@ -224,6 +224,40 @@ MATCH DETAIL OVERLAY
 .md-an-val{font-family:var(--fd);font-size:26px;font-weight:800}
 .md-empty-panel{text-align:center;color:var(--muted);padding:50px 20px;font-size:13px;line-height:1.8}
 
+/* OVERVIEW TAB */
+.md-ov-grid{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
+.md-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.md-card-title{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);padding:13px 14px;border-bottom:1px solid var(--border);background:var(--card)}
+.md-info-row{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(37,45,66,.4);font-size:13px}
+.md-info-row:last-child{border-bottom:none}
+.md-info-icon{flex-shrink:0;font-size:15px;width:18px;text-align:center}
+.md-info-label{color:var(--muted);font-size:11px;margin-bottom:2px}
+.md-info-val{font-weight:600}
+.md-ts-head{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid var(--border);background:var(--card)}
+.md-ts-head .md-card-title{padding:0;border:none;background:none}
+.md-ts-body{padding:6px 14px 14px}
+.md-ts-row{padding:9px 0}
+.md-ts-labels{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.md-ts-labels span:first-child,.md-ts-labels span:last-child{font-weight:700;min-width:34px}
+.md-ts-labels span:first-child{text-align:left}
+.md-ts-labels span:last-child{text-align:right}
+.md-ts-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--border)}
+.md-ts-bar .h{background:var(--live)}
+.md-ts-bar .a{background:var(--accent)}
+.md-events-card .md-card-title{display:flex;align-items:center;justify-content:space-between}
+.md-ev-filters{display:flex;gap:4px}
+.md-ev-filter-btn{font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid var(--border);color:var(--muted);background:none;cursor:pointer}
+.md-ev-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
+.md-evt-row{display:flex;align-items:flex-start;gap:11px;padding:10px 14px;border-bottom:1px solid rgba(37,45,66,.4);font-size:13px}
+.md-evt-row:last-child{border-bottom:none}
+.md-evt-min{font-family:var(--fd);font-weight:800;color:var(--accent);width:32px;flex-shrink:0;font-size:13px}
+.md-evt-icon{flex-shrink:0;width:18px;text-align:center}
+.md-evt-main{font-weight:600}
+.md-evt-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+.md-no-stats-note{padding:14px;color:var(--muted);font-size:12px;text-align:center}
+
+@media(max-width:900px){.md-ov-grid{grid-template-columns:1fr}}
+
 @media(max-width:900px){.md-pitch-wrap{grid-template-columns:1fr}.md-side-list{flex-direction:row;overflow-x:auto;gap:8px}.md-side-list .md-player-row{min-width:140px}.md-side-list.away .md-player-row{flex-direction:row;text-align:left}}
 @media(max-width:600px){.md-hero{padding:14px 14px 0}.md-tabs{padding:0 14px}.md-body{padding:16px 14px 30px}.md-team-name{font-size:18px}.md-center-score{font-size:38px}.md-crest{width:46px;height:46px}.md-score-row{gap:14px}}
 
@@ -322,13 +356,15 @@ MATCH DETAIL OVERLAY
 </div>
 </div>
 <div class="md-tabs">
-<div class="md-tab active" data-panel="squads" onclick="setMdTab(this)">Squads</div>
-<div class="md-tab" data-panel="progress" onclick="setMdTab(this)">Match Progress</div>
-<div class="md-tab" data-panel="stats" onclick="setMdTab(this)">Statistics</div>
+<div class="md-tab active" data-panel="overview" onclick="setMdTab(this)">Overview</div>
+<div class="md-tab" data-panel="progress" onclick="setMdTab(this)">Timeline</div>
+<div class="md-tab" data-panel="squads" onclick="setMdTab(this)">Lineups</div>
+<div class="md-tab" data-panel="stats" onclick="setMdTab(this)">Stats</div>
 <div class="md-tab" data-panel="analytics" onclick="setMdTab(this)">Analytics</div>
 </div>
 <div class="md-body">
-<div class="md-panel active" id="panel-squads"></div>
+<div class="md-panel active" id="panel-overview"></div>
+<div class="md-panel" id="panel-squads"></div>
 <div class="md-panel" id="panel-progress"></div>
 <div class="md-panel" id="panel-stats"></div>
 <div class="md-panel" id="panel-analytics"></div>
@@ -538,10 +574,15 @@ async function openMatchDetail(matchId) {
 const overlay = document.getElementById('mdOverlay');
 overlay.classList.add('open');
 document.body.style.overflow = 'hidden';
-// Show a quick loading state in the squads panel while we fetch
-document.getElementById('panel-squads').innerHTML =
+
+// Reset to the Overview tab each time a new match is opened
+document.querySelectorAll('.md-tab').forEach((t,i)=>t.classList.toggle('active', i===0));
+document.querySelectorAll('.md-panel').forEach((p,i)=>p.classList.toggle('active', i===0));
+
+// Show a quick loading state in the overview panel while we fetch
+document.getElementById('panel-overview').innerHTML =
 '<div class="loading-state"><div class="spinner"></div><p>Loading match…</p></div>';
-['progress','stats','analytics'].forEach(p=>document.getElementById('panel-'+p).innerHTML='');
+['squads','progress','stats','analytics'].forEach(p=>document.getElementById('panel-'+p).innerHTML='');
 
 // Start from whatever we already have in allMatches so the header fills in instantly
 const cached = allMatches.find(m => m.id === matchId);
@@ -551,14 +592,15 @@ try {
 const full = await apiFetch(`matches/${matchId}`);
 mdCurrentMatch = full;
 renderMdHero(full);
+renderMdOverview(full);
 renderMdSquads(full);
 renderMdProgress(full);
 renderMdStats(full);
 renderMdAnalytics(full);
 } catch(e) {
 mdCurrentMatch = cached || null;
-if (cached) { renderMdSquads(cached); renderMdProgress(cached); renderMdStats(cached); renderMdAnalytics(cached); }
-else document.getElementById('panel-squads').innerHTML =
+if (cached) { renderMdOverview(cached); renderMdSquads(cached); renderMdProgress(cached); renderMdStats(cached); renderMdAnalytics(cached); }
+else document.getElementById('panel-overview').innerHTML =
 `<div class="md-empty-panel">⚠️ Couldn't load match details<br><small>${e.message}</small></div>`;
 }
 }
@@ -671,6 +713,110 @@ if (isAway) { yPct = 100 - yPct; }
 return {x:xPct, y:yPct};
 }
 
+/* Shared stat-row builder used by both the Overview preview card and the full Stats tab.
+Prefers the real per-team statistics object from the API; falls back to goals/cards
+derived from match events when no statistics object is present for this fixture. */
+function buildStatRows(m) {
+const home = m.homeTeam, away = m.awayTeam;
+const hs = home?.statistics, as = away?.statistics;
+const goals = m.goals||[], bookings = m.bookings||[];
+const cnt = (arr, teamId, filterFn) => arr.filter(x => x.team?.id===teamId && (filterFn?filterFn(x):true)).length;
+
+let rows = [];
+if (hs && as) {
+const statDefs = [
+['ball_possession','Possession','%'], ['shots','Shots'], ['shots_on_goal','Shots on Target'],
+['corner_kicks','Corners'], ['fouls','Fouls'], ['offsides','Offsides'],
+['yellow_cards','Yellow Cards'], ['red_cards','Red Cards'], ['saves','Saves'],
+];
+rows = statDefs
+.filter(([key]) => hs[key] != null || as[key] != null)
+.map(([key,label,suffix]) => ({label, h:hs[key]??0, a:as[key]??0, suffix:suffix||''}));
+}
+if (!rows.length) {
+rows = [
+{label:'Goals', h:cnt(goals,home?.id), a:cnt(goals,away?.id)},
+{label:'Yellow Cards', h:cnt(bookings,home?.id,b=>b.card==='YELLOW'), a:cnt(bookings,away?.id,b=>b.card==='YELLOW')},
+{label:'Red Cards', h:cnt(bookings,home?.id,b=>b.card==='RED'), a:cnt(bookings,away?.id,b=>b.card==='RED')},
+].filter(r=>r.h||r.a);
+}
+return rows;
+}
+
+function mdStatBarHTML(rows) {
+return rows.map(r=>{
+const tot = (r.h+r.a) || 1;
+const hPct = (r.h/tot*100).toFixed(0), aPct = (r.a/tot*100).toFixed(0);
+return `<div class="md-ts-row">
+<div class="md-ts-labels"><span>${r.h}${r.suffix||''}</span><span style="color:var(--sub);font-weight:500">${r.label}</span><span>${r.a}${r.suffix||''}</span></div>
+<div class="md-ts-bar"><div class="h" style="width:${hPct}%"></div><div class="a" style="width:${aPct}%"></div></div>
+</div>`;
+}).join('');
+}
+
+function mdEventRowHTML(items) {
+return items.map(i=>`<div class="md-evt-row">
+<span class="md-evt-min">${i.min!=null?i.min+"'":''}</span>
+<span class="md-evt-icon">${i.icon}</span>
+<div><div class="md-evt-main">${i.main}</div>${i.sub?`<div class="md-evt-sub">${i.sub}</div>`:''}</div>
+</div>`).join('');
+}
+
+/* ══════════════════════════════════════
+OVERVIEW TAB — Match Info / Team Statistics / Match Events,
+all built from real fields the football-data.org API provides.
+══════════════════════════════════════ */
+function renderMdOverview(m) {
+const panel = document.getElementById('panel-overview');
+const home = m.homeTeam, away = m.awayTeam;
+const mainRef = (m.referees||[]).find(r=>r.type==='REFEREE') || (m.referees||[])[0];
+
+// Match Info card — only real fields, each row omitted if the API didn't supply it
+const infoRows = [
+m.venue && {icon:'🏟️', label:'Stadium', val:m.venue},
+mainRef?.name && {icon:'🟨', label:'Referee', val:mainRef.name},
+m.attendance && {icon:'👥', label:'Attendance', val:m.attendance.toLocaleString()},
+m.utcDate && {icon:'📅', label:'Date', val:new Date(m.utcDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})},
+m.matchday && {icon:'🔢', label:'Matchday', val:m.matchday},
+].filter(Boolean);
+
+const infoHTML = infoRows.length
+? infoRows.map(r=>`<div class="md-info-row"><span class="md-info-icon">${r.icon}</span><div><div class="md-info-label">${r.label}</div><div class="md-info-val">${r.val}</div></div></div>`).join('')
+: `<div class="md-no-stats-note">No match info available for this fixture.</div>`;
+
+// Team Statistics preview — first 6 rows, with a link to the full Stats tab
+const statRows = buildStatRows(m).slice(0,6);
+const statsHTML = statRows.length
+? mdStatBarHTML(statRows) + `<div style="text-align:center;margin-top:8px"><button class="act-btn" style="padding:6px 14px" onclick="document.querySelector('[data-panel=stats]').click()">View full stats ›</button></div>`
+: `<div class="md-no-stats-note">📊 Detailed statistics aren't provided by the data source for this fixture.</div>`;
+
+// Match Events — goals, cards, substitutions, all from real API arrays
+const goals = (m.goals||[]).map(g=>({min:g.minute, icon:'⚽', main:`${g.scorer?.name||'Goal'} ${g.type==='PENALTY'?'(Pen)':g.type==='OWN'?'(OG)':''}`.trim(), sub:g.assist?.name?`Assist: ${g.assist.name}`:(g.team?.name||'')}));
+const cards = (m.bookings||[]).map(b=>({min:b.minute, icon:b.card==='RED'?'🟥':'🟨', main:b.player?.name||'Card', sub:b.team?.name||''}));
+const subs = (m.substitutions||[]).map(s=>({min:s.minute, icon:'🔄', main:`${s.playerIn?.name||'?'} ⇄ ${s.playerOut?.name||'?'}`, sub:s.team?.name||''}));
+const events = [...goals,...cards,...subs].sort((a,b)=>(a.min??0)-(b.min??0));
+
+const eventsHTML = events.length
+? mdEventRowHTML(events)
+: `<div class="md-no-stats-note">No match events recorded yet.</div>`;
+
+panel.innerHTML = `<div class="md-ov-grid">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div class="md-card"><div class="md-card-title">Match Info</div>${infoHTML}</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div class="md-card">
+<div class="md-ts-head"><span class="md-card-title">Team Statistics</span></div>
+<div class="md-ts-body">${statsHTML}</div>
+</div>
+<div class="md-card md-events-card">
+<div class="md-card-title">Match Events</div>
+${eventsHTML}
+</div>
+</div>
+</div>`;
+}
+
 function renderMdSquads(m) {
 const panel = document.getElementById('panel-squads');
 const homeLineup = m.homeTeam?.lineup || [];
@@ -713,10 +859,11 @@ ${awayLineup.map(p=>mdPlayerRow(p,bookings)).join('') || '<div class="md-empty-p
 
 function renderMdProgress(m) {
 const panel = document.getElementById('panel-progress');
-const goals = m.goals||[], bookings = m.bookings||[];
+const goals = m.goals||[], bookings = m.bookings||[], subs = m.substitutions||[];
 const items = [
 ...goals.map(g=>({min:g.minute,icon:'⚽',html:`<b>Goal</b> — ${g.scorer?.name||'Unknown'} (${g.team?.name||''})`})),
 ...bookings.map(b=>({min:b.minute,icon:mdEventIcon(b.card),html:`<b>${b.card==='RED'?'Red card':'Yellow card'}</b> — ${b.player?.name||'Unknown'} (${b.team?.name||''})`})),
+...subs.map(s=>({min:s.minute,icon:'🔄',html:`<b>Substitution</b> — ${s.playerIn?.name||'?'} on for ${s.playerOut?.name||'?'} (${s.team?.name||''})`})),
 ];
 items.sort((a,b)=>(a.min??0)-(b.min??0));
 
@@ -734,39 +881,19 @@ ${items.map(i=>`<div class="md-prog-item"><span class="md-prog-min">${i.min??'-'
 
 function renderMdStats(m) {
 const panel = document.getElementById('panel-stats');
-const home = m.homeTeam, away = m.awayTeam;
-const hs = home?.statistics, as = away?.statistics;
-const goals = m.goals||[], bookings = m.bookings||[];
-const cnt = (arr, teamId, filterFn) => arr.filter(x => x.team?.id===teamId && (filterFn?filterFn(x):true)).length;
-
-let rows = [];
-if (hs && as) {
-// Real per-team match statistics, when the API provides them for this fixture/competition
-const statDefs = [
-['ball_possession','Possession','%'], ['shots','Shots'], ['shots_on_goal','Shots on Target'],
-['corner_kicks','Corners'], ['fouls','Fouls'], ['offsides','Offsides'],
-['yellow_cards','Yellow Cards'], ['red_cards','Red Cards'], ['saves','Saves'],
-];
-rows = statDefs
-.filter(([key]) => hs[key] != null || as[key] != null)
-.map(([key,label,suffix]) => ({label, h:hs[key]??0, a:as[key]??0, suffix:suffix||''}));
-}
-
-// Fallback: derive what we can from goals/bookings if no statistics object exists
-if (!rows.length) {
-rows = [
-{label:'Goals', h:cnt(goals,home?.id), a:cnt(goals,away?.id)},
-{label:'Yellow Cards', h:cnt(bookings,home?.id,b=>b.card==='YELLOW'), a:cnt(bookings,away?.id,b=>b.card==='YELLOW')},
-{label:'Red Cards', h:cnt(bookings,home?.id,b=>b.card==='RED'), a:cnt(bookings,away?.id,b=>b.card==='RED')},
-].filter(r=>r.h||r.a);
-}
+const rows = buildStatRows(m);
 
 if (!rows.length) {
 panel.innerHTML = `<div class="md-empty-panel">📊 Detailed match statistics aren't provided by the data source for this fixture.</div>`;
 return;
 }
 
-panel.innerHTML = `<div class="md-section-title">Statistics</div>` + rows.map(r=>{
+panel.innerHTML = `
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+<div style="display:flex;align-items:center;gap:8px">${crestImg(m.homeTeam,22)}<span style="font-weight:700">${m.homeTeam?.shortName||m.homeTeam?.name||''}</span></div>
+<div class="md-section-title" style="margin:0">Statistics</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700">${m.awayTeam?.shortName||m.awayTeam?.name||''}</span>${crestImg(m.awayTeam,22)}</div>
+</div>` + rows.map(r=>{
 const tot = (r.h+r.a) || 1;
 const hPct = (r.h/tot*100).toFixed(0), aPct = (r.a/tot*100).toFixed(0);
 return `<div class="md-stat-row">
