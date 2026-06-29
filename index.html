@@ -593,6 +593,24 @@ try {
 const full = await apiFetch(`matches/${matchId}`);
 mdCurrentMatch = full;
 renderMdHero(full);
+
+// Resolve the Stadium fallback BEFORE rendering Overview, so there is no
+// async patch-in-place step that can race with anything (tab switches,
+// re-opens, etc). Overview always gets a final, settled value up front.
+if (!full.venue && full.homeTeam?.id) {
+console.log('[stadium] match.venue missing, fetching teams/' + full.homeTeam.id);
+try {
+const teamData = await apiFetch(`teams/${full.homeTeam.id}`);
+console.log('[stadium] teams/ response:', teamData);
+full.__resolvedVenue = teamData?.venue || null;
+} catch(venueErr) {
+console.log('[stadium] teams/ fetch failed:', venueErr.message);
+full.__resolvedVenue = undefined; // undefined = "couldn't confirm", not "confirmed absent"
+}
+} else {
+console.log('[stadium] match.venue present:', full.venue);
+}
+
 renderMdOverview(full);
 renderMdSquads(full);
 renderMdProgress(full);
@@ -773,22 +791,24 @@ const home = m.homeTeam, away = m.awayTeam;
 const mainRef = (m.referees||[]).find(r=>r.type==='REFEREE') || (m.referees||[])[0];
 
 // Match Info card — only real fields, each row omitted if the API didn't supply it.
-// match.venue (the fixture's actual venue) is preferred; if absent we lazily fetch
-// the home team's registered home ground as a real-data fallback (see below).
+// Stadium: match.venue is preferred; openMatchDetail() resolves a fallback to the
+// home team's registered venue BEFORE calling this function (see __resolvedVenue),
+// so this render is fully synchronous — no async DOM patching, no race window.
+const stadiumDisplay = m.venue ? m.venue
+: m.__resolvedVenue ? m.__resolvedVenue
+: ('__resolvedVenue' in m) ? '<span style="color:var(--muted)">Not available</span>'
+: null;
+
 const infoRows = [
-{icon:'🏟️', label:'Stadium', val: m.venue || '__PENDING__', _stadium:true},
+stadiumDisplay && {icon:'🏟️', label:'Stadium', val:stadiumDisplay, _raw:true},
 mainRef?.name && {icon:'🟨', label:'Referee', val:mainRef.name},
 m.attendance && {icon:'👥', label:'Attendance', val:m.attendance.toLocaleString()},
 m.utcDate && {icon:'📅', label:'Date', val:new Date(m.utcDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})},
 m.matchday && {icon:'🔢', label:'Matchday', val:m.matchday},
 ].filter(Boolean);
 
-// Drop the stadium placeholder row entirely if we have neither a match venue
-// nor a home team id to look one up with — nothing to show or fetch.
-const finalRows = infoRows.filter(r => !(r._stadium && r.val==='__PENDING__' && !home?.id));
-
-const infoHTML = finalRows.length
-? finalRows.map(r=>`<div class="md-info-row" ${r._stadium?'id="md-stadium-row"':''}><span class="md-info-icon">${r.icon}</span><div><div class="md-info-label">${r.label}</div><div class="md-info-val">${r.val==='__PENDING__'?'<span style="color:var(--muted)">Loading…</span>':r.val}</div></div></div>`).join('')
+const infoHTML = infoRows.length
+? infoRows.map(r=>`<div class="md-info-row"><span class="md-info-icon">${r.icon}</span><div><div class="md-info-label">${r.label}</div><div class="md-info-val">${r.val}</div></div></div>`).join('')
 : `<div class="md-no-stats-note">No match info available for this fixture.</div>`;
 
 // Team Statistics preview — first 6 rows, with a link to the full Stats tab
@@ -822,32 +842,6 @@ ${eventsHTML}
 </div>
 </div>
 </div>`;
-
-// If the fixture itself didn't report a venue, fetch the home team's registered
-// home ground in the background and patch the Stadium row in once it arrives.
-// This is a real extra API call (the slim team object on a match never includes
-// venue), so we only make it when we actually need to and only once per open.
-if (!m.venue && home?.id) {
-apiFetch(`teams/${home.id}`).then(teamData => {
-const row = document.getElementById('md-stadium-row');
-if (!row || mdCurrentMatch?.id !== m.id) return; // overlay closed or switched matches
-const valEl = row.querySelector('.md-info-val');
-if (teamData?.venue) {
-valEl.textContent = teamData.venue;
-} else {
-// Successful response, but this team genuinely has no venue on file — drop the row.
-row.remove();
-}
-}).catch(() => {
-// The lookup failed (rate limit, network hiccup, etc). This does NOT mean no venue
-// exists — just that we couldn't confirm it. Never delete the row on failure; that's
-// what was causing it to flash and vanish. Leave a calm, permanent fallback instead.
-const row = document.getElementById('md-stadium-row');
-if (!row || mdCurrentMatch?.id !== m.id) return;
-const valEl = row.querySelector('.md-info-val');
-valEl.innerHTML = '<span style="color:var(--muted)">Not available</span>';
-});
-}
 }
 
 function renderMdSquads(m) {
