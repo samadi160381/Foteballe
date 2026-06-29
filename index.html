@@ -261,19 +261,10 @@ MATCH DETAIL OVERLAY
 <div class="sidebar-item" onclick="setSidebar('live',this)">🔴 Live Now <span class="s-count" id="sc-live">–</span></div>
 <div class="sidebar-item" onclick="setSidebar('finished',this)">✅ Finished</div>
 <div class="sidebar-item" onclick="setSidebar('upcoming',this)">🕐 Upcoming</div>
-<div class="sidebar-label">Leagues & Standings</div>
-<div class="ls-row"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="ls-name" onclick="setSidebar('PL',this.closest('.ls-row'))">Premier League</span><button class="ls-btn" onclick="triggerStandings('PL','Premier League','🏴󠁧󠁢󠁥󠁮󠁧󠁿',this)">Table</button></div>
-<div class="ls-row"><span>🇪🇸</span><span class="ls-name" onclick="setSidebar('PD',this.closest('.ls-row'))">La Liga</span><button class="ls-btn" onclick="triggerStandings('PD','La Liga','🇪🇸',this)">Table</button></div>
-<div class="ls-row"><span>🇩🇪</span><span class="ls-name" onclick="setSidebar('BL1',this.closest('.ls-row'))">Bundesliga</span><button class="ls-btn" onclick="triggerStandings('BL1','Bundesliga','🇩🇪',this)">Table</button></div>
-<div class="ls-row"><span>🇮🇹</span><span class="ls-name" onclick="setSidebar('SA',this.closest('.ls-row'))">Serie A</span><button class="ls-btn" onclick="triggerStandings('SA','Serie A','🇮🇹',this)">Table</button></div>
-<div class="ls-row"><span>🇫🇷</span><span class="ls-name" onclick="setSidebar('FL1',this.closest('.ls-row'))">Ligue 1</span><button class="ls-btn" onclick="triggerStandings('FL1','Ligue 1','🇫🇷',this)">Table</button></div>
-<div class="ls-row"><span>🇪🇺</span><span class="ls-name" onclick="setSidebar('CL',this.closest('.ls-row'))">Champions League</span><button class="ls-btn" onclick="triggerStandings('CL','Champions League','🇪🇺',this)">Table</button></div>
-<div class="ls-row"><span>🟠</span><span class="ls-name" onclick="setSidebar('EL',this.closest('.ls-row'))">Europa League</span><button class="ls-btn" onclick="triggerStandings('EL','Europa League','🟠',this)">Table</button></div>
-<div class="ls-row"><span>🇵🇹</span><span class="ls-name" onclick="setSidebar('PPL',this.closest('.ls-row'))">Primeira Liga</span><button class="ls-btn" onclick="triggerStandings('PPL','Primeira Liga','🇵🇹',this)">Table</button></div>
-<div class="ls-row"><span>🇳🇱</span><span class="ls-name" onclick="setSidebar('DED',this.closest('.ls-row'))">Eredivisie</span><button class="ls-btn" onclick="triggerStandings('DED','Eredivisie','🇳🇱',this)">Table</button></div>
-<div class="ls-row"><span>🌍</span><span class="ls-name" onclick="setSidebar('WC',this.closest('.ls-row'))">World Cup</span><button class="ls-btn" onclick="triggerStandings('WC','World Cup 2026','🌍',this)">Groups</button></div>
-<div class="ls-row"><span>🏆</span><span class="ls-name" onclick="setSidebar('EC',this.closest('.ls-row'))">Euro Champ.</span><button class="ls-btn" onclick="triggerStandings('EC','Euro Championship','🏆',this)">Groups</button></div>
-<div class="ls-row"><span>🇧🇷</span><span class="ls-name" onclick="setSidebar('BSA',this.closest('.ls-row'))">Brasileirão</span><button class="ls-btn" onclick="triggerStandings('BSA','Brasileirão','🇧🇷',this)">Table</button></div>
+<div class="sidebar-label">Leagues & Standings <span style="font-weight:400;text-transform:none;letter-spacing:0">(today's matches)</span></div>
+<div id="dynLeagues">
+<div class="no-st" style="padding:10px 14px;text-align:left">Loading…</div>
+</div>
 </aside>
 <main>
 <div class="top-strip">
@@ -315,7 +306,7 @@ MATCH DETAIL OVERLAY
 </div>
 <div class="md-score-row">
 <div class="md-team-col home">
-<img class="md-crest" id="mdHomeCrest" src="" onerror="this.style.visibility='hidden'">
+<img class="md-crest" id="mdHomeCrest" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" onerror="this.style.visibility='hidden'">
 <div class="md-team-name" id="mdHomeName">—</div>
 <div class="md-events" id="mdHomeEvents"></div>
 </div>
@@ -324,7 +315,7 @@ MATCH DETAIL OVERLAY
 <div class="md-status-pill" id="mdStatusPill">FT</div>
 </div>
 <div class="md-team-col away">
-<img class="md-crest" id="mdAwayCrest" src="" onerror="this.style.visibility='hidden'">
+<img class="md-crest" id="mdAwayCrest" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" onerror="this.style.visibility='hidden'">
 <div class="md-team-name" id="mdAwayName">—</div>
 <div class="md-events" id="mdAwayEvents"></div>
 </div>
@@ -398,6 +389,14 @@ BSA:{flag:'🇧🇷', country:'Brazil', z:{ucl:0,uel:0,rel:4}},
 };
 let allMatches=[], chipFilter='all', sideFilter='all', searchTerm='', activeDate='', activeStBtn=null;
 
+/* Only these 12 competitions are accessible on the football-data.org free tier.
+Anything else (friendlies, uncovered leagues/cups) returns thin/empty data, so we
+hide those matches entirely rather than show a broken-looking card. */
+const FREE_TIER_CODES = new Set(['PL','PD','BL1','SA','FL1','CL','EL','EC','WC','DED','PPL','BSA']);
+function isCoveredMatch(m) {
+return FREE_TIER_CODES.has(m.competition?.code);
+}
+
 async function apiFetch(path) {
 const clean = path.replace(/^\/+/,'');
 const url = isLocal
@@ -449,9 +448,10 @@ apiFetch(`matches?date=${utcDate2}`).catch(()=>({matches:[]})),
 matches = [...(d1.matches||[]), ...(d2.matches||[])];
 }
 
-// Filter to only matches whose LOCAL date matches the selected local date
-allMatches = matches.filter(m => matchLocalDate(m.utcDate) === localDateString);
-render(); updateTicker(); updateCounters(); renderFeatured();
+// Filter to only matches whose LOCAL date matches the selected local date,
+// AND only competitions covered by the free API tier (others show thin/broken data).
+allMatches = matches.filter(m => matchLocalDate(m.utcDate) === localDateString && isCoveredMatch(m));
+render(); updateTicker(); updateCounters(); renderFeatured(); refreshLeagueSidebar();
 const t = new Date();
 document.getElementById('lastUpdated').textContent =
 'Updated ' + t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -471,6 +471,16 @@ const backdrop = document.getElementById('rpBackdrop');
 const open = force !== undefined ? force : !panel.classList.contains('open');
 panel.classList.toggle('open', open);
 backdrop.classList.toggle('open', open);
+}
+
+/* Shared safe-crest renderer for small inline badges (standings rows, featured card).
+Only emits an <img> when a real URL exists; otherwise renders a neutral placeholder.
+Avoids src="" which can silently fail to fall back on some mobile browsers. */
+function crestImg(team, size) {
+if (team?.crest) {
+return `<img src="${team.crest}" style="width:${size}px;height:${size}px;vertical-align:middle;object-fit:contain;flex-shrink:0" onerror="this.outerHTML='<span style=&quot;display:inline-block;width:${size}px;height:${size}px;vertical-align:middle&quot;>⚽</span>'">`;
+}
+return `<span style="display:inline-block;width:${size}px;height:${size}px;vertical-align:middle">⚽</span>`;
 }
 
 /* ══════════════════════════════════════
@@ -568,10 +578,38 @@ document.getElementById('panel-'+el.dataset.panel).classList.add('active');
 
 function mdEventIcon(type) {
 if (type==='GOAL'||type==='OWN_GOAL'||type==='PENALTY') return '⚽';
-if (type==='YELLOW_CARD') return '🟨';
-if (type==='RED_CARD') return '🟥';
+if (type==='YELLOW') return '🟨';
+if (type==='RED') return '🟥';
 if (type==='SUBSTITUTION') return '🔄';
 return '•';
+}
+
+/* Safely set a team crest image. Never assigns an empty/blank src (which causes
+the browser to re-request the current page as an "image" and silently fail on
+some mobile browsers). Falls back to a circular initials badge when no crest URL
+exists or the image fails to load. */
+function setMdCrest(imgId, team) {
+const img = document.getElementById(imgId);
+const wrap = img.parentElement;
+let badge = wrap.querySelector('.md-crest-fallback');
+const initials = (team?.shortName || team?.name || team?.tla || '?').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
+if (!badge) {
+badge = document.createElement('div');
+badge.className = 'md-crest-fallback';
+badge.style.cssText = 'width:62px;height:62px;border-radius:50%;background:var(--border);display:none;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;font-size:20px;color:var(--sub);margin:0 auto';
+wrap.insertBefore(badge, img);
+}
+badge.textContent = initials;
+if (team?.crest) {
+img.style.display = '';
+img.style.visibility = 'visible';
+badge.style.display = 'none';
+img.onerror = () => { img.style.display='none'; badge.style.display='flex'; };
+img.src = team.crest;
+} else {
+img.style.display = 'none';
+badge.style.display = 'flex';
+}
 }
 
 function renderMdHero(m) {
@@ -579,8 +617,8 @@ document.getElementById('mdGroup').textContent = m.stage ? m.stage.replace(/_/g,
 const venueBits = [m.venue, m.utcDate ? new Date(m.utcDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}) : ''].filter(Boolean);
 document.getElementById('mdVenue').innerHTML = '📍 ' + (venueBits.join(' &nbsp;·&nbsp; ') || '—');
 
-document.getElementById('mdHomeCrest').src = m.homeTeam?.crest || '';
-document.getElementById('mdAwayCrest').src = m.awayTeam?.crest || '';
+setMdCrest('mdHomeCrest', m.homeTeam);
+setMdCrest('mdAwayCrest', m.awayTeam);
 document.getElementById('mdHomeName').textContent = m.homeTeam?.name || m.homeTeam?.shortName || '—';
 document.getElementById('mdAwayName').textContent = m.awayTeam?.name || m.awayTeam?.shortName || '—';
 
@@ -615,7 +653,7 @@ document.getElementById('mdAwayEvents').innerHTML = buildEvents(m.awayTeam?.id);
 
 function mdPlayerRow(p, bookings, side) {
 const card = (bookings||[]).find(b=>b.player?.id===p.id);
-const cardHTML = card ? `<div class="md-p-card ${card.card==='RED_CARD'?'red':'yellow'}"></div>` : '';
+const cardHTML = card ? `<div class="md-p-card ${card.card==='RED'?'red':'yellow'}"></div>` : '';
 return `<div class="md-player-row">
 <div class="md-p-avatar">⚽</div>
 <div class="md-p-info"><div class="md-p-name">${p.name}</div><div class="md-p-pos">${p.position||''}</div></div>
@@ -678,7 +716,7 @@ const panel = document.getElementById('panel-progress');
 const goals = m.goals||[], bookings = m.bookings||[];
 const items = [
 ...goals.map(g=>({min:g.minute,icon:'⚽',html:`<b>Goal</b> — ${g.scorer?.name||'Unknown'} (${g.team?.name||''})`})),
-...bookings.map(b=>({min:b.minute,icon:mdEventIcon(b.card),html:`<b>${b.card==='RED_CARD'?'Red card':'Yellow card'}</b> — ${b.player?.name||'Unknown'} (${b.team?.name||''})`})),
+...bookings.map(b=>({min:b.minute,icon:mdEventIcon(b.card),html:`<b>${b.card==='RED'?'Red card':'Yellow card'}</b> — ${b.player?.name||'Unknown'} (${b.team?.name||''})`})),
 ];
 items.sort((a,b)=>(a.min??0)-(b.min??0));
 
@@ -696,28 +734,43 @@ ${items.map(i=>`<div class="md-prog-item"><span class="md-prog-min">${i.min??'-'
 
 function renderMdStats(m) {
 const panel = document.getElementById('panel-stats');
-// football-data.org's free tier rarely exposes a detailed statistics node — derive what we can, and say so otherwise.
 const home = m.homeTeam, away = m.awayTeam;
+const hs = home?.statistics, as = away?.statistics;
 const goals = m.goals||[], bookings = m.bookings||[];
 const cnt = (arr, teamId, filterFn) => arr.filter(x => x.team?.id===teamId && (filterFn?filterFn(x):true)).length;
 
-const rows = [
-{label:'Goals', h:cnt(goals,home?.id), a:cnt(goals,away?.id)},
-{label:'Yellow Cards', h:cnt(bookings,home?.id,b=>b.card==='YELLOW_CARD'), a:cnt(bookings,away?.id,b=>b.card==='YELLOW_CARD')},
-{label:'Red Cards', h:cnt(bookings,home?.id,b=>b.card==='RED_CARD'), a:cnt(bookings,away?.id,b=>b.card==='RED_CARD')},
+let rows = [];
+if (hs && as) {
+// Real per-team match statistics, when the API provides them for this fixture/competition
+const statDefs = [
+['ball_possession','Possession','%'], ['shots','Shots'], ['shots_on_goal','Shots on Target'],
+['corner_kicks','Corners'], ['fouls','Fouls'], ['offsides','Offsides'],
+['yellow_cards','Yellow Cards'], ['red_cards','Red Cards'], ['saves','Saves'],
 ];
-const hasAny = rows.some(r=>r.h||r.a);
+rows = statDefs
+.filter(([key]) => hs[key] != null || as[key] != null)
+.map(([key,label,suffix]) => ({label, h:hs[key]??0, a:as[key]??0, suffix:suffix||''}));
+}
 
-if (!hasAny) {
-panel.innerHTML = `<div class="md-empty-panel">📊 Detailed match statistics (possession, shots, passes) aren't provided by the current data source for this fixture.</div>`;
+// Fallback: derive what we can from goals/bookings if no statistics object exists
+if (!rows.length) {
+rows = [
+{label:'Goals', h:cnt(goals,home?.id), a:cnt(goals,away?.id)},
+{label:'Yellow Cards', h:cnt(bookings,home?.id,b=>b.card==='YELLOW'), a:cnt(bookings,away?.id,b=>b.card==='YELLOW')},
+{label:'Red Cards', h:cnt(bookings,home?.id,b=>b.card==='RED'), a:cnt(bookings,away?.id,b=>b.card==='RED')},
+].filter(r=>r.h||r.a);
+}
+
+if (!rows.length) {
+panel.innerHTML = `<div class="md-empty-panel">📊 Detailed match statistics aren't provided by the data source for this fixture.</div>`;
 return;
 }
 
 panel.innerHTML = `<div class="md-section-title">Statistics</div>` + rows.map(r=>{
-const tot = r.h+r.a || 1;
+const tot = (r.h+r.a) || 1;
 const hPct = (r.h/tot*100).toFixed(0), aPct = (r.a/tot*100).toFixed(0);
 return `<div class="md-stat-row">
-<div class="md-stat-labels"><b>${r.h}</b><span>${r.label}</span><b>${r.a}</b></div>
+<div class="md-stat-labels"><b>${r.h}${r.suffix||''}</b><span>${r.label}</span><b>${r.a}${r.suffix||''}</b></div>
 <div class="md-stat-bar"><div class="home-fill" style="width:${hPct}%"></div><div class="away-fill" style="width:${aPct}%"></div></div>
 </div>`;
 }).join('');
@@ -726,6 +779,7 @@ return `<div class="md-stat-row">
 function renderMdAnalytics(m) {
 const panel = document.getElementById('panel-analytics');
 const home = m.homeTeam, away = m.awayTeam;
+const mainRef = (m.referees||[]).find(r=>r.type==='REFEREE') || (m.referees||[])[0];
 const cards = [
 {label:'Competition', val: m.competition?.name || '—'},
 {label:'Matchday', val: m.matchday ?? '—'},
@@ -734,8 +788,11 @@ const cards = [
 {label:'Away Formation', val: away?.formation || '—'},
 {label:'Home Coach', val: home?.coach?.name || '—'},
 {label:'Away Coach', val: away?.coach?.name || '—'},
-{label:'Referee', val: (m.referees&&m.referees[0]?.name) || '—'},
+{label:'Referee', val: mainRef?.name || '—'},
 ];
+if (m.odds && (m.odds.homeWin || m.odds.draw || m.odds.awayWin)) {
+cards.push({label:'Odds (H / D / A)', val: `${m.odds.homeWin ?? '–'} / ${m.odds.draw ?? '–'} / ${m.odds.awayWin ?? '–'}`});
+}
 panel.innerHTML = `<div class="md-section-title">Analytics</div>
 <div class="md-analytics-grid">
 ${cards.map(c=>`<div class="md-an-card"><h4>${c.label}</h4><div class="md-an-val">${c.val}</div></div>`).join('')}
@@ -746,6 +803,11 @@ ${cards.map(c=>`<div class="md-an-card"><h4>${c.label}</h4><div class="md-an-val
 function buildStandingsHTML(data, code, name, flag, slot) {
 const standings = data.standings || [];
 const meta = LMETA[code] || {};
+// Prefer the real flag image the API returns over a hardcoded emoji — this also
+// makes standings work correctly for leagues outside our original hardcoded list.
+const flagHTML = data.area?.flag
+? `<img src="${data.area.flag}" style="width:18px;height:13px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='${flag}'">`
+: flag;
 
 // Multiple TOTAL groups → group stage (WC, CL, EC)
 const totalGroups = standings.filter(s => s.type === 'TOTAL');
@@ -755,7 +817,7 @@ const label = (g.group || '').replace('GROUP_','Group ').replace(/_/g,' ') || 'G
 const rows = (g.table || []).map(r => `
 <tr>
 <td>${r.position}</td>
-<td><img src="${r.team.crest||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.shortName||r.team.name}</td>
+<td>${crestImg(r.team,13)} ${r.team.shortName||r.team.name}</td>
 <td>${r.playedGames}</td><td>${r.won}</td><td>${r.draw}</td><td>${r.lost}</td>
 <td>${r.goalDifference>=0?'+':''}${r.goalDifference}</td>
 <td class="pts">${r.points}</td>
@@ -770,7 +832,7 @@ return `<div class="wc-group">
 }).join('');
 slot.innerHTML = `
 <div class="st-panel">
-<div class="stp-head"><span class="stp-flag">${flag}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="stp-head"><span class="stp-flag">${flagHTML}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
 ${groupsHTML}
 </div>`;
 return;
@@ -789,7 +851,7 @@ return '';
 const rows = table.map(r => `
 <tr class="${zClass(r.position, table.length)}">
 <td>${r.position}</td>
-<td><img src="${r.team.crest||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.shortName||r.team.name}</td>
+<td>${crestImg(r.team,13)} ${r.team.shortName||r.team.name}</td>
 <td>${r.playedGames}</td><td>${r.won}</td><td>${r.draw}</td><td>${r.lost}</td>
 <td>${r.goalDifference>=0?'+':''}${r.goalDifference}</td>
 <td class="pts">${r.points}</td>
@@ -804,7 +866,7 @@ ${z.rel ? `<div class="leg-item"><div class="leg-dot" style="background:var(--li
 
 slot.innerHTML = `
 <div class="st-panel">
-<div class="stp-head"><span class="stp-flag">${flag}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="stp-head"><span class="stp-flag">${flagHTML}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
 <table class="stp-table">
 <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead>
 <tbody>${rows}</tbody>
@@ -827,12 +889,12 @@ const isLive = m.status==='IN_PLAY';
 el.innerHTML = `
 <div class="feat-teams">
 <div class="feat-team">
-<img src="${m.homeTeam.crest||''}" class="feat-logo" onerror="this.style.display='none'">
+${m.homeTeam.crest ? `<img src="${m.homeTeam.crest}" class="feat-logo" onerror="this.outerHTML='<div class=feat-logo style=\'display:flex;align-items:center;justify-content:center;font-size:20px\'>⚽</div>'">` : `<div class="feat-logo" style="display:flex;align-items:center;justify-content:center;font-size:20px">⚽</div>`}
 <div class="feat-name">${m.homeTeam.shortName||m.homeTeam.name}</div>
 </div>
 <div class="feat-score">${hs}&nbsp;–&nbsp;${as}</div>
 <div class="feat-team">
-<img src="${m.awayTeam.crest||''}" class="feat-logo" onerror="this.style.display='none'">
+${m.awayTeam.crest ? `<img src="${m.awayTeam.crest}" class="feat-logo" onerror="this.outerHTML='<div class=feat-logo style=\'display:flex;align-items:center;justify-content:center;font-size:20px\'>⚽</div>'">` : `<div class="feat-logo" style="display:flex;align-items:center;justify-content:center;font-size:20px">⚽</div>`}
 <div class="feat-name">${m.awayTeam.shortName||m.awayTeam.name}</div>
 </div>
 </div>
@@ -957,6 +1019,38 @@ const n = allMatches.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED').length
 document.getElementById('liveBadge').textContent = n+' Live';
 document.getElementById('sc-all').textContent = n;
 document.getElementById('sc-live').textContent = n;
+}
+
+/* ══════════════════════════════════════
+DYNAMIC LEAGUE SIDEBAR
+Builds one row + Table/Groups button per competition actually present
+in today's matches, instead of relying on a fixed hardcoded list.
+══════════════════════════════════════ */
+function refreshLeagueSidebar() {
+const container = document.getElementById('dynLeagues');
+// Collect distinct competitions from today's (already free-tier-filtered) matches
+const seen = new Map();
+allMatches.forEach(m => {
+const code = m.competition?.code;
+if (code && !seen.has(code)) seen.set(code, m.competition);
+});
+
+if (!seen.size) {
+container.innerHTML = '<div class="no-st" style="padding:10px 14px;text-align:left">No covered leagues playing today</div>';
+return;
+}
+
+container.innerHTML = '';
+[...seen.entries()].sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([code, info]) => {
+const meta = LMETA[code] || {};
+const isGroupStage = code==='WC' || code==='EC' || code==='CL' || code==='EL';
+const row = document.createElement('div');
+row.className = 'ls-row';
+row.innerHTML = `<span>${meta.flag||'🏆'}</span><span class="ls-name">${info.name}</span><button class="ls-btn">${isGroupStage?'Groups':'Table'}</button>`;
+row.querySelector('.ls-name').onclick = () => setSidebar(code, row);
+row.querySelector('.ls-btn').onclick = () => triggerStandings(code, info.name, meta.flag||'🏆', row.querySelector('.ls-btn'));
+container.appendChild(row);
+});
 }
 
 /* ══════════════════════════════════════
