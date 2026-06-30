@@ -430,6 +430,26 @@ let allMatches=[], chipFilter='all', sideFilter='all', searchTerm='', activeDate
 Anything else (friendlies, uncovered leagues/cups) returns thin/empty data, so we
 hide those matches entirely rather than show a broken-looking card. */
 const FREE_TIER_CODES = new Set(['PL','PD','BL1','SA','FL1','CL','EL','EC','WC','DED','PPL','BSA']);
+
+/* Manual venue overrides, keyed by football-data.org match id.
+Use this when the API hasn't published a venue yet for a real, known fixture
+(common for World Cup knockout matches right as brackets lock in) — add an
+entry here and it takes priority over both the API field and the team lookup.
+
+HOW TO FIND THE MATCH ID: open the match in this app, then open your browser's
+console (on mobile Safari/Chrome this usually needs "desktop site" + dev tools,
+or use a laptop). Look for a line like:
+"[stadium] match.venue missing, fetching teams/57"
+— that's the team id, not the match id. The match id is whatever number you
+passed to openMatchDetail(), visible in the Network tab as the request to
+/api/matches?path=matches/<ID HERE>.
+
+Example for today's Germany vs Paraguay Round of 32 match (replace 0 with the
+real match id once you have it — confirmed venue is Gillette Stadium):
+*/
+const VENUE_OVERRIDES = {
+// 0: 'Gillette Stadium, Foxborough, Massachusetts',
+};
 function isCoveredMatch(m) {
 return FREE_TIER_CODES.has(m.competition?.code);
 }
@@ -597,7 +617,11 @@ renderMdHero(full);
 // Resolve the Stadium fallback BEFORE rendering Overview, so there is no
 // async patch-in-place step that can race with anything (tab switches,
 // re-opens, etc). Overview always gets a final, settled value up front.
-if (!full.venue && full.homeTeam?.id) {
+// Manual overrides (VENUE_OVERRIDES) always win and skip the extra API call.
+if (VENUE_OVERRIDES[full.id]) {
+console.log('[stadium] using manual override for match ' + full.id);
+full.__resolvedVenue = VENUE_OVERRIDES[full.id];
+} else if (!full.venue && full.homeTeam?.id) {
 console.log('[stadium] match.venue missing, fetching teams/' + full.homeTeam.id);
 try {
 const teamData = await apiFetch(`teams/${full.homeTeam.id}`);
