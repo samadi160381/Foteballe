@@ -89,6 +89,12 @@ main{flex:1;padding:18px;min-width:0}
 .match-acts{display:flex;gap:3px;justify-content:flex-end}
 .act-btn{font-size:10px;padding:3px 7px;border-radius:4px;border:1px solid var(--border);color:var(--sub);transition:all .15s}
 .act-btn:hover{border-color:var(--accent);color:var(--accent)}
+.scorers-row{grid-column:1/-1;background:var(--surface);border-top:1px solid var(--border);padding:8px 13px;font-size:11.5px;color:var(--sub)}
+.scorers-row.hidden{display:none}
+.scorers-loading{color:var(--muted)}
+.goal-line{display:flex;align-items:center;gap:6px;padding:2px 0}
+.goal-line .gl-min{color:var(--live);font-weight:700;width:34px;flex-shrink:0}
+.goal-line .gl-side{width:14px;text-align:center;flex-shrink:0}
 /* RIGHT PANEL */
 .right-panel{width:310px;flex-shrink:0;border-left:1px solid var(--border);position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:14px}
 .feat-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden;flex-shrink:0}
@@ -130,14 +136,6 @@ main{flex:1;padding:18px;min-width:0}
 .wc-group:last-child{border-bottom:none}
 .st-hint{text-align:center;color:var(--muted);font-size:12px;padding:20px 12px;line-height:1.8;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
 .st-hint strong{color:var(--accent)}
-.lq-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid rgba(37,45,66,.4);font-size:12.5px;cursor:pointer;transition:background .12s}
-.lq-row:last-child{border-bottom:none}
-.lq-row:hover{background:rgba(255,255,255,.03)}
-.lq-flag{font-size:16px;flex-shrink:0;width:22px;text-align:center}
-.lq-name{flex:1;font-weight:500}
-.lq-btn{font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);color:var(--muted);background:none;cursor:pointer;transition:all .15s;flex-shrink:0}
-.lq-btn:hover{border-color:var(--accent);color:var(--accent)}
-.lq-btn.on{background:var(--accent);border-color:var(--accent);color:#000}
 .no-st{padding:16px;text-align:center;color:var(--muted);font-size:12px}
 .loading-state{text-align:center;padding:60px 20px;color:var(--muted)}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 12px}
@@ -146,141 +144,8 @@ main{flex:1;padding:18px;min-width:0}
 .err-box p{font-size:13px;line-height:1.7}
 footer{border-top:1px solid var(--border);padding:16px;text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
 footer a{color:var(--accent)}
-
-/* ══════════════════════════════════════
-MATCH DETAIL OVERLAY
-══════════════════════════════════════ */
-.md-overlay{position:fixed;inset:0;background:var(--bg);z-index:500;overflow-y:auto;display:none}
-.md-overlay.open{display:block}
-.md-close{position:fixed;top:14px;right:16px;z-index:520;width:34px;height:34px;border-radius:50%;background:rgba(13,15,20,.7);border:1px solid var(--border);color:var(--text);font-size:16px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-.md-close:hover{background:rgba(255,255,255,.1)}
-.md-hero{position:relative;min-height:340px;padding:18px 24px 0;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(13,15,20,.55) 0%,rgba(13,15,20,.65) 40%,rgba(13,15,20,.97) 100%),var(--card);background-size:cover;background-position:center}
-.md-hero-search{display:flex;align-items:center;gap:8px;color:var(--sub);font-size:13px;margin-bottom:18px}
-.md-top-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:22px}
-.md-group-badge{background:var(--live);color:#fff;font-size:11px;font-weight:700;padding:4px 11px;border-radius:5px;letter-spacing:.4px}
-.md-venue{text-align:right;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:6px;justify-content:flex-end}
-.md-score-row{display:flex;align-items:center;justify-content:center;gap:34px;flex-wrap:wrap;padding-bottom:20px}
-.md-team-col{flex:1;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.md-team-col.away{align-items:center}
-.md-crest{width:62px;height:62px;object-fit:contain}
-.md-team-name{font-family:var(--fd);font-size:24px;font-weight:800}
-.md-events{width:100%;display:flex;flex-direction:column;gap:5px;margin-top:4px}
-.md-event{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--sub)}
-.md-team-col.away .md-event{flex-direction:row-reverse}
-.md-event b{color:var(--text);font-weight:600}
-.md-ev-icon{width:13px;flex-shrink:0;text-align:center}
-.md-center-score{font-family:var(--fd);font-size:52px;font-weight:800;letter-spacing:2px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px}
-.md-center-score .md-status-pill{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--live);background:rgba(232,48,58,.12);padding:3px 10px;border-radius:8px}
-.md-tabs{display:flex;gap:26px;padding:0 24px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10;overflow-x:auto;scrollbar-width:none}
-.md-tabs::-webkit-scrollbar{display:none}
-.md-tab{padding:13px 2px;font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap;cursor:pointer;transition:color .15s}
-.md-tab:hover{color:var(--text)}
-.md-tab.active{color:var(--live);border-bottom-color:var(--live)}
-.md-body{padding:20px 24px 40px;max-width:1300px;margin:0 auto}
-.md-panel{display:none}
-.md-panel.active{display:block}
-
-/* SQUADS / PITCH */
-.md-pitch-wrap{display:grid;grid-template-columns:230px 1fr 230px;gap:14px;align-items:start}
-.md-side-list{display:flex;flex-direction:column;gap:4px}
-.md-player-row{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
-.md-side-list.away .md-player-row{flex-direction:row-reverse;text-align:right}
-.md-p-avatar{width:30px;height:30px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);flex-shrink:0}
-.md-p-info{flex:1;min-width:0}
-.md-p-name{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.md-p-pos{font-size:10.5px;color:var(--muted)}
-.md-p-card{width:9px;height:12px;border-radius:1px;flex-shrink:0}
-.md-p-card.yellow{background:#f5c518}.md-p-card.red{background:var(--live)}
-.md-pitch{position:relative;background:linear-gradient(180deg,#1b3a2b,#16301f);border:1px solid var(--border);border-radius:var(--radius);min-height:480px;overflow:hidden}
-.md-pitch::before,.md-pitch::after{content:'';position:absolute;border:1px solid rgba(255,255,255,.15)}
-.md-pitch::before{inset:0;margin:8px}
-.md-pitch::after{left:50%;top:8px;bottom:8px;width:0;border-left:1px solid rgba(255,255,255,.15);transform:translateX(-50%)}
-.md-pitch-circle{position:absolute;left:50%;top:50%;width:90px;height:90px;border:1px solid rgba(255,255,255,.15);border-radius:50%;transform:translate(-50%,-50%)}
-.md-dot{position:absolute;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,.4)}
-.md-dot.home{background:linear-gradient(135deg,var(--live),#a8222a)}
-.md-dot.away{background:linear-gradient(135deg,#fff,#ccc);color:#1a1a1a}
-.md-dot-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;white-space:nowrap;margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
-.md-no-lineup{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:440px;color:rgba(255,255,255,.55);text-align:center;padding:30px;gap:8px}
-.md-no-lineup .nl-icon{font-size:30px}
-
-/* TIMELINE */
-.md-timeline-wrap{margin-top:28px}
-.md-section-title{font-family:var(--fd);font-size:18px;font-weight:800;margin-bottom:14px}
-.md-timeline{position:relative;padding:18px 0;border-top:2px solid var(--border)}
-.md-timeline-track{position:relative;height:2px;background:var(--border);margin:0 6px}
-.md-tl-pt{position:absolute;top:-5px;width:12px;height:12px;border-radius:50%;background:var(--accent);transform:translateX(-50%);border:2px solid var(--bg)}
-.md-tl-label{position:absolute;font-size:11px;white-space:nowrap;transform:translateX(-50%);text-align:center;line-height:1.5}
-.md-tl-label.top{bottom:22px}
-.md-tl-label.bottom{top:22px}
-.md-tl-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px}
-
-/* PROGRESS / STATS / ANALYTICS */
-.md-progress-list{display:flex;flex-direction:column;gap:10px}
-.md-prog-item{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px}
-.md-prog-min{font-family:var(--fd);font-weight:800;color:var(--accent);width:34px;flex-shrink:0}
-.md-prog-icon{width:20px;text-align:center;flex-shrink:0}
-.md-prog-text b{font-weight:700}
-.md-stat-row{margin-bottom:16px}
-.md-stat-labels{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
-.md-stat-labels b{font-weight:700}
-.md-stat-bar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--border)}
-.md-stat-bar .home-fill{background:var(--live)}
-.md-stat-bar .away-fill{background:var(--accent)}
-.md-analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-.md-an-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
-.md-an-card h4{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
-.md-an-val{font-family:var(--fd);font-size:26px;font-weight:800}
-.md-empty-panel{text-align:center;color:var(--muted);padding:50px 20px;font-size:13px;line-height:1.8}
-
-/* OVERVIEW TAB */
-.md-ov-grid{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
-.md-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.md-card-title{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);padding:13px 14px;border-bottom:1px solid var(--border);background:var(--card)}
-.md-info-row{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(37,45,66,.4);font-size:13px}
-.md-info-row:last-child{border-bottom:none}
-.md-info-icon{flex-shrink:0;font-size:15px;width:18px;text-align:center}
-.md-info-label{color:var(--muted);font-size:11px;margin-bottom:2px}
-.md-info-val{font-weight:600}
-.md-ts-head{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid var(--border);background:var(--card)}
-.md-ts-head .md-card-title{padding:0;border:none;background:none}
-.md-ts-body{padding:6px 14px 14px}
-.md-ts-row{padding:9px 0}
-.md-ts-labels{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
-.md-ts-labels span:first-child,.md-ts-labels span:last-child{font-weight:700;min-width:34px}
-.md-ts-labels span:first-child{text-align:left}
-.md-ts-labels span:last-child{text-align:right}
-.md-ts-bar{display:flex;height:6px;border-radius:4px;overflow:hidden;background:var(--border)}
-.md-ts-bar .h{background:var(--live)}
-.md-ts-bar .a{background:var(--accent)}
-.md-events-card .md-card-title{display:flex;align-items:center;justify-content:space-between}
-.md-ev-filters{display:flex;gap:4px}
-.md-ev-filter-btn{font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid var(--border);color:var(--muted);background:none;cursor:pointer}
-.md-ev-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
-.md-evt-row{display:flex;align-items:flex-start;gap:11px;padding:10px 14px;border-bottom:1px solid rgba(37,45,66,.4);font-size:13px}
-.md-evt-row:last-child{border-bottom:none}
-.md-evt-min{font-family:var(--fd);font-weight:800;color:var(--accent);width:32px;flex-shrink:0;font-size:13px}
-.md-evt-icon{flex-shrink:0;width:18px;text-align:center}
-.md-evt-main{font-weight:600}
-.md-evt-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
-.md-no-stats-note{padding:14px;color:var(--muted);font-size:12px;text-align:center}
-
-@media(max-width:900px){.md-ov-grid{grid-template-columns:1fr}}
-
-@media(max-width:900px){.md-pitch-wrap{grid-template-columns:1fr}.md-side-list{flex-direction:row;overflow-x:auto;gap:8px}.md-side-list .md-player-row{min-width:140px}.md-side-list.away .md-player-row{flex-direction:row;text-align:left}}
-@media(max-width:600px){.md-hero{padding:14px 14px 0}.md-tabs{padding:0 14px}.md-body{padding:16px 14px 30px}.md-team-name{font-size:18px}.md-center-score{font-size:38px}.md-crest{width:46px;height:46px}.md-score-row{gap:14px}}
-
-.rp-toggle{display:none;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--accent);background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.2);border-radius:14px;padding:5px 11px;white-space:nowrap;flex-shrink:0}
-.rp-toggle .badge{background:var(--accent);color:#000;border-radius:8px;font-size:10px;padding:0 5px;display:none}
-.rp-toggle .badge.show{display:inline-block}
-
 @media(max-width:1150px){.right-panel{width:270px}}
-@media(max-width:980px){
-.right-panel{position:fixed;top:54px;right:0;height:calc(100vh - 54px);width:300px;max-width:85vw;background:var(--bg);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .25s ease;z-index:150;box-shadow:-8px 0 24px rgba(0,0,0,.4)}
-.right-panel.open{transform:translateX(0)}
-.rp-toggle{display:flex}
-.rp-backdrop{display:none;position:fixed;inset:54px 0 0 0;background:rgba(0,0,0,.5);z-index:140}
-.rp-backdrop.open{display:block}
-}
+@media(max-width:980px){.right-panel{display:none}}
 @media(max-width:760px){aside{display:none}}
 @media(max-width:560px){header{padding:0 10px}.search-box{display:none}.tz-badge{display:none}main{padding:10px}.match-row{grid-template-columns:60px 1fr auto 1fr}.match-acts{display:none}.score-box{font-size:20px;min-width:44px}}
 </style>
@@ -293,10 +158,8 @@ MATCH DETAIL OVERLAY
 <span class="tz-badge" id="tzBadge">🌐 …</span>
 <span id="lastUpdated">Connecting…</span>
 <div class="search-box"><span>🔍</span><input type="text" id="searchInput" placeholder="Search…"/></div>
-<button class="rp-toggle" onclick="toggleRightPanel()">📊 Standings <span class="badge" id="rpBadge"></span></button>
 </div>
 </header>
-<div class="rp-backdrop" id="rpBackdrop" onclick="toggleRightPanel(false)"></div>
 <div class="page">
 <aside>
 <div class="sidebar-label">Quick Filters</div>
@@ -304,12 +167,19 @@ MATCH DETAIL OVERLAY
 <div class="sidebar-item" onclick="setSidebar('live',this)">🔴 Live Now <span class="s-count" id="sc-live">–</span></div>
 <div class="sidebar-item" onclick="setSidebar('finished',this)">✅ Finished</div>
 <div class="sidebar-item" onclick="setSidebar('upcoming',this)">🕐 Upcoming</div>
-<div class="sidebar-label">Leagues & Standings <span style="font-weight:400;text-transform:none;letter-spacing:0">(today's matches)</span></div>
-<div id="dynLeagues">
-<div class="no-st" style="padding:10px 14px;text-align:left">Loading…</div>
-</div>
-<div class="sidebar-label">More Leagues <span style="font-weight:400;text-transform:none;letter-spacing:0">(loads on tap)</span></div>
-<div id="altLeagues"></div>
+<div class="sidebar-label">Leagues & Standings</div>
+<div class="ls-row"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="ls-name" onclick="setSidebar('PL',this.closest('.ls-row'))">Premier League</span><button class="ls-btn" onclick="triggerStandings('PL','Premier League','🏴󠁧󠁢󠁥󠁮󠁧󠁿',this)">Table</button></div>
+<div class="ls-row"><span>🇪🇸</span><span class="ls-name" onclick="setSidebar('PD',this.closest('.ls-row'))">La Liga</span><button class="ls-btn" onclick="triggerStandings('PD','La Liga','🇪🇸',this)">Table</button></div>
+<div class="ls-row"><span>🇩🇪</span><span class="ls-name" onclick="setSidebar('BL1',this.closest('.ls-row'))">Bundesliga</span><button class="ls-btn" onclick="triggerStandings('BL1','Bundesliga','🇩🇪',this)">Table</button></div>
+<div class="ls-row"><span>🇮🇹</span><span class="ls-name" onclick="setSidebar('SA',this.closest('.ls-row'))">Serie A</span><button class="ls-btn" onclick="triggerStandings('SA','Serie A','🇮🇹',this)">Table</button></div>
+<div class="ls-row"><span>🇫🇷</span><span class="ls-name" onclick="setSidebar('FL1',this.closest('.ls-row'))">Ligue 1</span><button class="ls-btn" onclick="triggerStandings('FL1','Ligue 1','🇫🇷',this)">Table</button></div>
+<div class="ls-row"><span>🇪🇺</span><span class="ls-name" onclick="setSidebar('CL',this.closest('.ls-row'))">Champions League</span><button class="ls-btn" onclick="triggerStandings('CL','Champions League','🇪🇺',this)">Table</button></div>
+<div class="ls-row"><span>🟠</span><span class="ls-name" onclick="setSidebar('EL',this.closest('.ls-row'))">Europa League</span><button class="ls-btn" onclick="triggerStandings('EL','Europa League','🟠',this)">Table</button></div>
+<div class="ls-row"><span>🇵🇹</span><span class="ls-name" onclick="setSidebar('PPL',this.closest('.ls-row'))">Primeira Liga</span><button class="ls-btn" onclick="triggerStandings('PPL','Primeira Liga','🇵🇹',this)">Table</button></div>
+<div class="ls-row"><span>🇳🇱</span><span class="ls-name" onclick="setSidebar('DED',this.closest('.ls-row'))">Eredivisie</span><button class="ls-btn" onclick="triggerStandings('DED','Eredivisie','🇳🇱',this)">Table</button></div>
+<div class="ls-row"><span>🌍</span><span class="ls-name" onclick="setSidebar('WC',this.closest('.ls-row'))">World Cup</span><button class="ls-btn" onclick="triggerStandings('WC','World Cup 2026','🌍',this)">Groups</button></div>
+<div class="ls-row"><span>🏆</span><span class="ls-name" onclick="setSidebar('EC',this.closest('.ls-row'))">Euro Champ.</span><button class="ls-btn" onclick="triggerStandings('EC','Euro Championship','🏆',this)">Groups</button></div>
+<div class="ls-row"><span>🇧🇷</span><span class="ls-name" onclick="setSidebar('BSA',this.closest('.ls-row'))">Brasileirão</span><button class="ls-btn" onclick="triggerStandings('BSA','Brasileirão','🇧🇷',this)">Table</button></div>
 </aside>
 <main>
 <div class="top-strip">
@@ -335,59 +205,11 @@ MATCH DETAIL OVERLAY
 <div id="featContent"><div style="text-align:center;color:var(--muted);padding:14px 0;font-size:12px">Loading…</div></div>
 </div>
 <div id="standingsSlot">
-<div class="st-panel" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
-<div class="stp-head" style="background:var(--card)">
-<span class="stp-title" style="font-size:13px">League Tables</span>
-</div>
-<div id="leagueQuickList"></div>
-</div>
-<div id="standingsContent"></div>
+<div class="st-hint">👆 Click <strong>Table</strong> or <strong>Groups</strong><br>next to any league to see<br>live standings here</div>
 </div>
 </div>
 </div>
 <footer><p>© 2026 GoalPulse · All times in your local timezone · Data: <a href="https://football-data.org" target="_blank">football-data.org</a></p></footer>
-
-<!-- MATCH DETAIL OVERLAY -->
-<div class="md-overlay" id="mdOverlay">
-<button class="md-close" onclick="closeMatchDetail()">✕</button>
-<div class="md-hero" id="mdHero">
-<div class="md-top-row">
-<span class="md-group-badge" id="mdGroup">—</span>
-<div class="md-venue" id="mdVenue">📍 —</div>
-</div>
-<div class="md-score-row">
-<div class="md-team-col home">
-<img class="md-crest" id="mdHomeCrest" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" onerror="this.style.visibility='hidden'">
-<div class="md-team-name" id="mdHomeName">—</div>
-<div class="md-events" id="mdHomeEvents"></div>
-</div>
-<div class="md-center-score">
-<div id="mdScore">0 : 0</div>
-<div class="md-status-pill" id="mdStatusPill">FT</div>
-</div>
-<div class="md-team-col away">
-<img class="md-crest" id="mdAwayCrest" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" onerror="this.style.visibility='hidden'">
-<div class="md-team-name" id="mdAwayName">—</div>
-<div class="md-events" id="mdAwayEvents"></div>
-</div>
-</div>
-</div>
-<div class="md-tabs">
-<div class="md-tab active" data-panel="overview" onclick="setMdTab(this)">Overview</div>
-<div class="md-tab" data-panel="progress" onclick="setMdTab(this)">Timeline</div>
-<div class="md-tab" data-panel="squads" onclick="setMdTab(this)">Lineups</div>
-<div class="md-tab" data-panel="stats" onclick="setMdTab(this)">Stats</div>
-<div class="md-tab" data-panel="analytics" onclick="setMdTab(this)">Analytics</div>
-</div>
-<div class="md-body">
-<div class="md-panel active" id="panel-overview"></div>
-<div class="md-panel" id="panel-squads"></div>
-<div class="md-panel" id="panel-progress"></div>
-<div class="md-panel" id="panel-stats"></div>
-<div class="md-panel" id="panel-analytics"></div>
-</div>
-</div>
-
 <script>
 /* ══════════════════════════════════════
 TIMEZONE — everything in LOCAL time
@@ -442,124 +264,6 @@ BSA:{flag:'🇧🇷', country:'Brazil', z:{ucl:0,uel:0,rel:4}},
 };
 let allMatches=[], chipFilter='all', sideFilter='all', searchTerm='', activeDate='', activeStBtn=null;
 
-/* Only these 12 competitions are accessible on the football-data.org free tier.
-Anything else (friendlies, uncovered leagues/cups) returns thin/empty data, so we
-hide those matches entirely rather than show a broken-looking card. */
-const FREE_TIER_CODES = new Set(['PL','PD','BL1','SA','FL1','CL','EL','EC','WC','DED','PPL','BSA']);
-
-/* ══════════════════════════════════════
-ALT LEAGUES — second data source (API-Football), used ONLY when the user
-explicitly opens this section. Never included in the auto-refresh loop or
-the main match list, since the free API-Football tier is only 100 requests
-per day total (vs football-data.org's ~14,000/day) — see altApiFetch().
-
-League IDs are API-Football's own numeric ids, found via their dashboard at
-dashboard.api-football.com/soccer/ids/leagues (search the league by name).
-══════════════════════════════════════ */
-const ALT_LEAGUES = {
-MA_BOTOLA: { id: 200, name: 'Botola Pro', flag: '🇲🇦', country: 'Morocco' },
-// Argentina's Liga Profesional id could not be confirmed from documentation —
-// look it up at dashboard.api-football.com/soccer/ids/leagues (search "Argentina")
-// and paste the numeric id below to enable it.
-AR_LIGA: { id: null, name: 'Liga Profesional', flag: '🇦🇷', country: 'Argentina' },
-};
-const ALT_SEASON = 2026; // API-Football's "season" param; update each year
-
-async function altApiFetch(path) {
-const clean = path.replace(/^\/+/,'');
-const url = isLocal
-? `https://v3.football.api-sports.io/${clean}`
-: `/api/altfootball?path=${encodeURIComponent(clean)}`;
-const headers = isLocal ? {'x-apisports-key':'73c725b077b7969f8ea3a111bea9327d'} : {};
-const r = await fetch(url, {headers});
-if (!r.ok) { const t=await r.text().catch(()=>''); throw new Error(`HTTP ${r.status}: ${t.slice(0,120)}`); }
-return r.json();
-}
-
-/* WC 2026 venue lookup by team-name pair — covers all Round of 32 fixtures.
-Football-data.org often omits venue for WC knockout matches even when publicly
-known. We look up by home+away team names (sorted so order doesn't matter).
-Data confirmed from FIFA.com and official WC 2026 sources. */
-const WC_VENUES = {
-'France|Sweden': 'MetLife Stadium, East Rutherford, NJ',
-'Germany|Paraguay': 'Gillette Stadium, Foxborough, MA',
-'Spain|Algeria': 'AT&T Stadium, Arlington, TX',
-'England|Panama': 'Rose Bowl Stadium, Pasadena, CA',
-'Portugal|Colombia': 'Hard Rock Stadium, Miami Gardens, FL',
-'Argentina|Jordan': 'Estadio Azteca, Mexico City',
-'Brazil|Ecuador': 'Levi\'s Stadium, Santa Clara, CA',
-'Morocco|Chile': 'Mercedes-Benz Stadium, Atlanta, GA',
-'Netherlands|Japan': 'Lincoln Financial Field, Philadelphia, PA',
-'USA|Tunisia': 'SoFi Stadium, Inglewood, CA',
-'Belgium|New Zealand': 'BC Place, Vancouver',
-'Uruguay|Türkiye': 'Q2 Stadium, Austin, TX',
-'Croatia|Ghana': 'NRG Stadium, Houston, TX',
-'Italy|Mexico': 'Estadio BBVA, Guadalajara',
-};
-
-/* Tries to find a WC venue from the lookup above by matching the two team names,
-regardless of which is home/away. Returns the venue string or null. */
-function lookupWcVenue(m) {
-const h = m.homeTeam?.name || m.homeTeam?.shortName || '';
-const a = m.awayTeam?.name || m.awayTeam?.shortName || '';
-return WC_VENUES[`${h}|${a}`] || WC_VENUES[`${a}|${h}`] || null;
-}
-
-/* Manual overrides by match ID for any match not covered by WC_VENUES.
-Find the match ID via browser Network tab: the request to
-/api/matches?path=matches/<ID> is logged when you open a match detail. */
-const VENUE_OVERRIDES = {};
-
-function isCoveredMatch(m) {
-return FREE_TIER_CODES.has(m.competition?.code);
-}
-
-/* Converts one API-Football fixture object into the same shape every render
-function in this app already expects (the football-data.org match shape).
-This is what lets Argentina/Morocco matches flow through the exact same
-match-row rendering, hero, and Overview tab as everything else, without a
-parallel UI. Only fields that are actually used downstream are mapped —
-this is NOT a full 1:1 schema translation. */
-function adaptAltFixture(fx, leagueMeta) {
-const statusMap = {
-'1H':'IN_PLAY','2H':'IN_PLAY','ET':'IN_PLAY','P':'IN_PLAY','LIVE':'IN_PLAY',
-'HT':'PAUSED',
-'FT':'FINISHED','AET':'FINISHED','PEN':'FINISHED',
-'NS':'TIMED',
-'PST':'POSTPONED','CANC':'POSTPONED','ABD':'POSTPONED',
-};
-const shortStatus = fx.fixture?.status?.short || 'NS';
-return {
-id: `alt_${fx.fixture.id}`, // prefixed so it never collides with a football-data.org numeric id
-_altSource: true, // flag so openMatchDetail knows to route this through altApiFetch
-_altFixtureId: fx.fixture.id,
-utcDate: fx.fixture.date,
-status: statusMap[shortStatus] || 'TIMED',
-minute: fx.fixture?.status?.elapsed ?? null,
-venue: fx.fixture?.venue?.name || null,
-attendance: null, // not provided by this endpoint
-matchday: null,
-stage: fx.league?.round || null,
-referees: fx.fixture?.referee ? [{name: fx.fixture.referee.split(',')[0].trim(), type:'REFEREE'}] : [],
-competition: { id: `alt_${leagueMeta.id}`, code: leagueMeta.code, name: leagueMeta.name },
-homeTeam: { id: fx.teams.home.id, name: fx.teams.home.name, shortName: fx.teams.home.name, crest: fx.teams.home.logo },
-awayTeam: { id: fx.teams.away.id, name: fx.teams.away.name, shortName: fx.teams.away.name, crest: fx.teams.away.logo },
-score: { fullTime: { home: fx.goals?.home ?? null, away: fx.goals?.away ?? null } },
-goals: [], bookings: [], substitutions: [], // populated separately on detail open, not in the list view
-};
-}
-
-/* Fetches today's fixtures for one ALT_LEAGUES entry. Only called when the user
-explicitly opens that league's section — never from the auto-refresh loop. */
-async function loadAltLeagueMatches(key) {
-const meta = ALT_LEAGUES[key];
-if (!meta || !meta.id) return [];
-const todayStr = new Date().toISOString().slice(0,10);
-const data = await altApiFetch(`fixtures?league=${meta.id}&season=${ALT_SEASON}&date=${todayStr}`);
-const fixtures = data?.response || [];
-return fixtures.map(fx => adaptAltFixture(fx, {...meta, code: key}));
-}
-
 async function apiFetch(path) {
 const clean = path.replace(/^\/+/,'');
 const url = isLocal
@@ -569,6 +273,92 @@ const headers = isLocal ? {'X-Auth-Token':'8684c9e13ec4428db00d63b95adc2cf4'} : 
 const r = await fetch(url, {headers});
 if (!r.ok) { const t=await r.text().catch(()=>''); throw new Error(`HTTP ${r.status}: ${t.slice(0,120)}`); }
 return r.json();
+}
+
+/* ══════════════════════════════════════
+LIVE MINUTE — estimated client-side
+football-data.org's free plan does not return a live "minute" field,
+so we approximate elapsed time from kickoff (1st half) and from the
+first moment we observe the match resume after HT (2nd half).
+State persists across polls in matchClocks, keyed by match id.
+══════════════════════════════════════ */
+const matchClocks = {};
+
+function estimateMinute(m) {
+const id = m.id;
+const now = Date.now();
+if (!matchClocks[id]) matchClocks[id] = { wasHT:false, secondHalfStart:null };
+const c = matchClocks[id];
+
+if (m.status === 'PAUSED') {
+c.wasHT = true;
+return null; // shown as "HT" badge instead
+}
+if (m.status !== 'IN_PLAY') return null;
+
+if (c.wasHT) {
+if (!c.secondHalfStart) c.secondHalfStart = now;
+const mins = 45 + Math.floor((now - c.secondHalfStart) / 60000);
+return Math.min(mins, 90);
+} else {
+const kickoff = new Date(m.utcDate).getTime();
+const mins = Math.floor((now - kickoff) / 60000);
+return Math.max(1, Math.min(mins, 45));
+}
+}
+
+function minuteLabel(mins, status) {
+if (status === 'PAUSED') return 'HT';
+if (mins == null) return '●';
+if (mins >= 45 && mins < 46) return "45+'";
+if (mins >= 90) return "90+'";
+return mins + "'";
+}
+
+/* ══════════════════════════════════════
+GOAL SCORERS — fetched on demand (Stats button)
+football-data.org only includes the "goals" array with scorer +
+minute on the single-match endpoint, not the bulk list, so we only
+call it when the user actually asks to see it (avoids rate limits).
+══════════════════════════════════════ */
+const scorersCache = {};
+
+async function toggleScorers(matchId, btn) {
+const row = document.getElementById('scorers-' + matchId);
+if (!row) return;
+
+if (!row.classList.contains('hidden')) {
+row.classList.add('hidden');
+return;
+}
+row.classList.remove('hidden');
+
+if (scorersCache[matchId]) {
+row.innerHTML = scorersCache[matchId];
+return;
+}
+
+row.innerHTML = '<span class="scorers-loading">Loading goal scorers…</span>';
+try {
+const data = await apiFetch(`matches/${matchId}`);
+const goals = data.goals || [];
+let html;
+if (!goals.length) {
+html = '<span class="scorers-loading">No goals yet.</span>';
+} else {
+html = goals.map(g => {
+const side = g.team && data.homeTeam && g.team.id === data.homeTeam.id ? '🏠' : '🚩';
+const scorer = g.scorer?.name || 'Unknown';
+const assist = g.assist?.name ? ` (assist: ${g.assist.name})` : '';
+const min = g.minute != null ? g.minute + (g.injuryTime ? '+' + g.injuryTime : '') + "'" : '';
+return `<div class="goal-line"><span class="gl-min">${min}</span><span class="gl-side">${side}</span><span>⚽ ${scorer}${assist}</span></div>`;
+}).join('');
+}
+scorersCache[matchId] = html;
+row.innerHTML = html;
+} catch (e) {
+row.innerHTML = `<span class="scorers-loading">Scorers unavailable (${e.message})</span>`;
+}
 }
 
 /* ══════════════════════════════════════
@@ -588,17 +378,13 @@ const [y,m,d] = localDateString.split('-').map(Number);
 const localMidnight = new Date(y, m-1, d); // midnight local
 
 // UTC dates we need to cover this local day
-// A local day spans from localMidnight to localMidnight+24h in UTC.
-// localMidnight in UTC = localMidnight - tzOffset
 const tzOffsetMs = localMidnight.getTimezoneOffset() * 60000;
 const utcStart = new Date(localMidnight.getTime() + tzOffsetMs);
 const utcEnd = new Date(utcStart.getTime() + 24*3600*1000);
 
-// UTC dates that overlap
 const utcDate1 = localDateStr(utcStart);
 const utcDate2 = localDateStr(utcEnd);
 
-// Fetch — if same UTC date, one request; else two
 let matches = [];
 if (utcDate1 === utcDate2) {
 const data = await apiFetch(`matches?date=${utcDate1}`);
@@ -611,10 +397,9 @@ apiFetch(`matches?date=${utcDate2}`).catch(()=>({matches:[]})),
 matches = [...(d1.matches||[]), ...(d2.matches||[])];
 }
 
-// Filter to only matches whose LOCAL date matches the selected local date,
-// AND only competitions covered by the free API tier (others show thin/broken data).
-allMatches = matches.filter(m => matchLocalDate(m.utcDate) === localDateString && isCoveredMatch(m));
-render(); updateTicker(); updateCounters(); renderFeatured(); refreshLeagueSidebar();
+allMatches = matches.filter(m => matchLocalDate(m.utcDate) === localDateString);
+
+render(); updateTicker(); updateCounters(); renderFeatured();
 const t = new Date();
 document.getElementById('lastUpdated').textContent =
 'Updated ' + t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -626,43 +411,19 @@ document.getElementById('matchesContainer').innerHTML =
 }
 
 /* ══════════════════════════════════════
-RIGHT PANEL DRAWER (tablet/mobile)
-══════════════════════════════════════ */
-function toggleRightPanel(force) {
-const panel = document.getElementById('rightPanel');
-const backdrop = document.getElementById('rpBackdrop');
-const open = force !== undefined ? force : !panel.classList.contains('open');
-panel.classList.toggle('open', open);
-backdrop.classList.toggle('open', open);
-}
-
-/* Shared safe-crest renderer for small inline badges (standings rows, featured card).
-Only emits an <img> when a real URL exists; otherwise renders a neutral placeholder.
-Avoids src="" which can silently fail to fall back on some mobile browsers. */
-function crestImg(team, size) {
-if (team?.crest) {
-return `<img src="${team.crest}" style="width:${size}px;height:${size}px;vertical-align:middle;object-fit:contain;flex-shrink:0" onerror="this.outerHTML='<span style=&quot;display:inline-block;width:${size}px;height:${size}px;vertical-align:middle&quot;>⚽</span>'">`;
-}
-return `<span style="display:inline-block;width:${size}px;height:${size}px;vertical-align:middle">⚽</span>`;
-}
-
-/* ══════════════════════════════════════
 STANDINGS
 ══════════════════════════════════════ */
 async function triggerStandings(code, name, flag, btn) {
-const slot = document.getElementById('standingsContent');
-// Toggle off — just clear the content area
+const slot = document.getElementById('standingsSlot');
 if (activeStBtn === btn) {
 btn.classList.remove('on');
 activeStBtn = null;
-slot.innerHTML = '';
+slot.innerHTML = '<div class="st-hint">👆 Click <strong>Table</strong> or <strong>Groups</strong><br>next to any league to see<br>live standings here</div>';
 return;
 }
 if (activeStBtn) activeStBtn.classList.remove('on');
 btn.classList.add('on');
 activeStBtn = btn;
-// On tablet/mobile widths, open the drawer so the user actually sees the result
-if (window.innerWidth <= 980) toggleRightPanel(true);
 slot.innerHTML = `
 <div class="st-panel">
 <div class="stp-head">
@@ -672,8 +433,7 @@ slot.innerHTML = `
 </div>
 <div class="stp-loading"><div class="stp-spinner"></div>Loading standings…</div>
 </div>`;
-// Scroll right panel to show standings
-setTimeout(()=>document.getElementById('rightPanel').scrollTo({top:300,behavior:'smooth'}),100);
+setTimeout(()=>document.getElementById('rightPanel').scrollTo({top:220,behavior:'smooth'}),100);
 try {
 const data = await apiFetch(`competitions/${code}/standings`);
 buildStandingsHTML(data, code, name, flag, slot);
@@ -688,461 +448,22 @@ slot.innerHTML = `
 
 function closeStandings() {
 if (activeStBtn) { activeStBtn.classList.remove('on'); activeStBtn = null; }
-document.getElementById('standingsContent').innerHTML = '';
+document.getElementById('standingsSlot').innerHTML =
+'<div class="st-hint">👆 Click <strong>Table</strong> or <strong>Groups</strong><br>next to any league to see<br>live standings here</div>';
 }
-
-/* ══════════════════════════════════════
-MATCH DETAIL OVERLAY
-══════════════════════════════════════ */
-let mdCurrentMatch = null;
-
-async function openMatchDetail(matchId) {
-const overlay = document.getElementById('mdOverlay');
-overlay.classList.add('open');
-document.body.style.overflow = 'hidden';
-
-// Reset to the Overview tab each time a new match is opened
-document.querySelectorAll('.md-tab').forEach((t,i)=>t.classList.toggle('active', i===0));
-document.querySelectorAll('.md-panel').forEach((p,i)=>p.classList.toggle('active', i===0));
-
-// Show a quick loading state in the overview panel while we fetch
-document.getElementById('panel-overview').innerHTML =
-'<div class="loading-state"><div class="spinner"></div><p>Loading match…</p></div>';
-['squads','progress','stats','analytics'].forEach(p=>document.getElementById('panel-'+p).innerHTML='');
-
-// Start from whatever we already have in allMatches so the header fills in instantly
-const cached = allMatches.find(m => String(m.id) === String(matchId));
-if (cached) renderMdHero(cached);
-
-// Matches loaded from the alt source (Argentina/Morocco via API-Football) need a
-// completely different detail call — they don't exist in football-data.org at all.
-if (cached?._altSource) {
-try {
-const data = await altApiFetch(`fixtures?id=${cached._altFixtureId}`);
-const fx = data?.response?.[0];
-if (!fx) throw new Error('Fixture not found');
-const full = adaptAltFixture(fx, {id: cached.competition.id, code: cached.competition.code, name: cached.competition.name});
-// API-Football's events array maps cleanly to goals/bookings/substitutions
-const events = fx.events || [];
-full.goals = events.filter(e=>e.type==='Goal').map(e=>({minute:e.time?.elapsed, type: e.detail?.toUpperCase().includes('OWN')?'OWN':(e.detail?.toUpperCase().includes('PEN')?'PENALTY':'REGULAR'), team:{id:e.team?.id,name:e.team?.name}, scorer:{name:e.player?.name}, assist: e.assist?.name?{name:e.assist.name}:null}));
-full.bookings = events.filter(e=>e.type==='Card').map(e=>({minute:e.time?.elapsed, card: e.detail?.toUpperCase().includes('RED')?'RED':'YELLOW', team:{id:e.team?.id,name:e.team?.name}, player:{name:e.player?.name}}));
-full.substitutions = events.filter(e=>e.type==='subst').map(e=>({minute:e.time?.elapsed, team:{id:e.team?.id,name:e.team?.name}, playerOut:{name:e.player?.name}, playerIn:{name:e.assist?.name}}));
-full.score = { fullTime: { home: fx.goals?.home ?? null, away: fx.goals?.away ?? null } };
-mdCurrentMatch = full;
-renderMdHero(full);
-renderMdOverview(full); // venue comes straight from fixture.venue.name — no extra lookup call needed
-renderMdSquads(full); // will show "Lineups not available" since lineups need a separate altApiFetch call we don't make by default
-renderMdProgress(full);
-renderMdStats(full);
-renderMdAnalytics(full);
-} catch(e) {
-mdCurrentMatch = cached;
-renderMdOverview(cached);
-document.getElementById('panel-overview').innerHTML += `<div class="md-empty-panel" style="margin-top:10px">⚠️ Couldn't load full details from the alt source<br><small>${e.message}</small></div>`;
-}
-return;
-}
-
-try {
-const full = await apiFetch(`matches/${matchId}`);
-mdCurrentMatch = full;
-renderMdHero(full);
-
-// Resolve the Stadium fallback BEFORE rendering Overview, so there is no
-// async patch-in-place step that can race with anything (tab switches,
-// re-opens, etc). Overview always gets a final, settled value up front.
-// Priority: manual override → WC team-pair lookup → match.venue → team API call.
-if (VENUE_OVERRIDES[full.id]) {
-console.log('[stadium] using manual override for match ' + full.id);
-full.__resolvedVenue = VENUE_OVERRIDES[full.id];
-} else if (!full.venue && full.competition?.code === 'WC') {
-const wcVenue = lookupWcVenue(full);
-if (wcVenue) {
-console.log('[stadium] WC venue lookup match:', wcVenue);
-full.__resolvedVenue = wcVenue;
-} else if (full.homeTeam?.id) {
-try {
-const teamData = await apiFetch(`teams/${full.homeTeam.id}`);
-full.__resolvedVenue = teamData?.venue || null;
-} catch(e) { full.__resolvedVenue = undefined; }
-} else { full.__resolvedVenue = undefined; }
-} else if (!full.venue && full.homeTeam?.id) {
-console.log('[stadium] match.venue missing, fetching teams/' + full.homeTeam.id);
-try {
-const teamData = await apiFetch(`teams/${full.homeTeam.id}`);
-console.log('[stadium] teams/ response:', teamData);
-full.__resolvedVenue = teamData?.venue || null;
-} catch(venueErr) {
-console.log('[stadium] teams/ fetch failed:', venueErr.message);
-full.__resolvedVenue = undefined;
-}
-} else {
-console.log('[stadium] match.venue present:', full.venue);
-}
-
-renderMdOverview(full);
-renderMdSquads(full);
-renderMdProgress(full);
-renderMdStats(full);
-renderMdAnalytics(full);
-} catch(e) {
-mdCurrentMatch = cached || null;
-if (cached) { renderMdOverview(cached); renderMdSquads(cached); renderMdProgress(cached); renderMdStats(cached); renderMdAnalytics(cached); }
-else document.getElementById('panel-overview').innerHTML =
-`<div class="md-empty-panel">⚠️ Couldn't load match details<br><small>${e.message}</small></div>`;
-}
-}
-
-function closeMatchDetail() {
-document.getElementById('mdOverlay').classList.remove('open');
-document.body.style.overflow = '';
-mdCurrentMatch = null;
-}
-
-function setMdTab(el) {
-document.querySelectorAll('.md-tab').forEach(t=>t.classList.remove('active'));
-document.querySelectorAll('.md-panel').forEach(p=>p.classList.remove('active'));
-el.classList.add('active');
-document.getElementById('panel-'+el.dataset.panel).classList.add('active');
-}
-
-function mdEventIcon(type) {
-if (type==='GOAL'||type==='OWN_GOAL'||type==='PENALTY') return '⚽';
-if (type==='YELLOW') return '🟨';
-if (type==='RED') return '🟥';
-if (type==='SUBSTITUTION') return '🔄';
-return '•';
-}
-
-/* Safely set a team crest image. Never assigns an empty/blank src (which causes
-the browser to re-request the current page as an "image" and silently fail on
-some mobile browsers). Falls back to a circular initials badge when no crest URL
-exists or the image fails to load. */
-function setMdCrest(imgId, team) {
-const img = document.getElementById(imgId);
-const wrap = img.parentElement;
-let badge = wrap.querySelector('.md-crest-fallback');
-const initials = (team?.shortName || team?.name || team?.tla || '?').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
-if (!badge) {
-badge = document.createElement('div');
-badge.className = 'md-crest-fallback';
-badge.style.cssText = 'width:62px;height:62px;border-radius:50%;background:var(--border);display:none;align-items:center;justify-content:center;font-family:var(--fd);font-weight:800;font-size:20px;color:var(--sub);margin:0 auto';
-wrap.insertBefore(badge, img);
-}
-badge.textContent = initials;
-if (team?.crest) {
-img.style.display = '';
-img.style.visibility = 'visible';
-badge.style.display = 'none';
-img.onerror = () => { img.style.display='none'; badge.style.display='flex'; };
-img.src = team.crest;
-} else {
-img.style.display = 'none';
-badge.style.display = 'flex';
-}
-}
-
-function renderMdHero(m) {
-document.getElementById('mdGroup').textContent = m.stage ? m.stage.replace(/_/g,' ') : (m.competition?.name || '—');
-const venueBits = [m.venue, m.utcDate ? new Date(m.utcDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}) : ''].filter(Boolean);
-document.getElementById('mdVenue').innerHTML = '📍 ' + (venueBits.join(' &nbsp;·&nbsp; ') || '—');
-
-setMdCrest('mdHomeCrest', m.homeTeam);
-setMdCrest('mdAwayCrest', m.awayTeam);
-document.getElementById('mdHomeName').textContent = m.homeTeam?.name || m.homeTeam?.shortName || '—';
-document.getElementById('mdAwayName').textContent = m.awayTeam?.name || m.awayTeam?.shortName || '—';
-
-const hs = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? '–';
-const as = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? '–';
-document.getElementById('mdScore').textContent = `${hs} : ${as}`;
-
-const pill = document.getElementById('mdStatusPill');
-const statusMap = {IN_PLAY:'LIVE',PAUSED:'HT',FINISHED:'FULL TIME',TIMED:'UPCOMING',SCHEDULED:'UPCOMING',POSTPONED:'POSTPONED'};
-const isLive = m.status==='IN_PLAY';
-const minuteStr = isLive && m.minute ? `${m.minute}'` : (m.status==='PAUSED' ? 'HT' : '');
-pill.innerHTML = `${statusMap[m.status]||m.status||'—'}${minuteStr ? `<span style="display:block;font-size:13px;font-weight:800;letter-spacing:0;margin-top:2px">${minuteStr}</span>` : ''}`;
-pill.style.color = isLive ? 'var(--live)' : (m.status==='FINISHED' ? 'var(--muted)' : 'var(--accent)');
-
-// Hero background: blend team colors via crest-based radial glow (no external photo dependency)
-document.getElementById('mdHero').style.background =
-`linear-gradient(180deg,rgba(13,15,20,.6) 0%,rgba(13,15,20,.7) 45%,rgba(13,15,20,.98) 100%),
-radial-gradient(circle at 15% 20%, rgba(232,48,58,.25), transparent 55%),
-radial-gradient(circle at 85% 25%, rgba(0,194,255,.18), transparent 55%), var(--card)`;
-
-// Goal/card events per side
-const goals = m.goals || [];
-const bookings = m.bookings || [];
-const buildEvents = (teamId) => {
-const items = [];
-goals.filter(g=>g.team?.id===teamId).forEach(g=>items.push({min:g.minute,icon:mdEventIcon(g.type||'GOAL'),text:`<b>${g.scorer?.name||'Goal'}</b> ${g.minute}'`}));
-bookings.filter(b=>b.team?.id===teamId).forEach(b=>items.push({min:b.minute,icon:mdEventIcon(b.card),text:`<b>${b.player?.name||'Card'}</b> ${b.minute}'`}));
-items.sort((a,b)=>a.min-b.min);
-return items.map(i=>`<div class="md-event"><span class="md-ev-icon">${i.icon}</span><span>${i.text}</span></div>`).join('');
-};
-document.getElementById('mdHomeEvents').innerHTML = buildEvents(m.homeTeam?.id);
-document.getElementById('mdAwayEvents').innerHTML = buildEvents(m.awayTeam?.id);
-}
-
-function mdPlayerRow(p, bookings, side) {
-const card = (bookings||[]).find(b=>b.player?.id===p.id);
-const cardHTML = card ? `<div class="md-p-card ${card.card==='RED'?'red':'yellow'}"></div>` : '';
-return `<div class="md-player-row">
-<div class="md-p-avatar">⚽</div>
-<div class="md-p-info"><div class="md-p-name">${p.name}</div><div class="md-p-pos">${p.position||''}</div></div>
-${cardHTML}
-</div>`;
-}
-
-/* Map a football-data grid string like "2:3" (row:col) to pitch %, mirrored for the away team */
-function mdGridToPos(grid, rows, isAway) {
-const [r,c] = (grid||'1:1').split(':').map(Number);
-const totalCols = 5;
-let xPct = (c/(totalCols+1))*100;
-let yPct = (r/(rows+1))*100;
-if (isAway) { yPct = 100 - yPct; }
-return {x:xPct, y:yPct};
-}
-
-/* Shared stat-row builder used by both the Overview preview card and the full Stats tab.
-Prefers the real per-team statistics object from the API; falls back to goals/cards
-derived from match events when no statistics object is present for this fixture. */
-function buildStatRows(m) {
-const home = m.homeTeam, away = m.awayTeam;
-const hs = home?.statistics, as = away?.statistics;
-const goals = m.goals||[], bookings = m.bookings||[];
-const cnt = (arr, teamId, filterFn) => arr.filter(x => x.team?.id===teamId && (filterFn?filterFn(x):true)).length;
-
-let rows = [];
-if (hs && as) {
-const statDefs = [
-['ball_possession','Possession','%'], ['shots','Shots'], ['shots_on_goal','Shots on Target'],
-['corner_kicks','Corners'], ['fouls','Fouls'], ['offsides','Offsides'],
-['yellow_cards','Yellow Cards'], ['red_cards','Red Cards'], ['saves','Saves'],
-];
-rows = statDefs
-.filter(([key]) => hs[key] != null || as[key] != null)
-.map(([key,label,suffix]) => ({label, h:hs[key]??0, a:as[key]??0, suffix:suffix||''}));
-}
-if (!rows.length) {
-rows = [
-{label:'Goals', h:cnt(goals,home?.id), a:cnt(goals,away?.id)},
-{label:'Yellow Cards', h:cnt(bookings,home?.id,b=>b.card==='YELLOW'), a:cnt(bookings,away?.id,b=>b.card==='YELLOW')},
-{label:'Red Cards', h:cnt(bookings,home?.id,b=>b.card==='RED'), a:cnt(bookings,away?.id,b=>b.card==='RED')},
-].filter(r=>r.h||r.a);
-}
-return rows;
-}
-
-function mdStatBarHTML(rows) {
-return rows.map(r=>{
-const tot = (r.h+r.a) || 1;
-const hPct = (r.h/tot*100).toFixed(0), aPct = (r.a/tot*100).toFixed(0);
-return `<div class="md-ts-row">
-<div class="md-ts-labels"><span>${r.h}${r.suffix||''}</span><span style="color:var(--sub);font-weight:500">${r.label}</span><span>${r.a}${r.suffix||''}</span></div>
-<div class="md-ts-bar"><div class="h" style="width:${hPct}%"></div><div class="a" style="width:${aPct}%"></div></div>
-</div>`;
-}).join('');
-}
-
-function mdEventRowHTML(items) {
-return items.map(i=>`<div class="md-evt-row">
-<span class="md-evt-min">${i.min!=null?i.min+"'":''}</span>
-<span class="md-evt-icon">${i.icon}</span>
-<div><div class="md-evt-main">${i.main}</div>${i.sub?`<div class="md-evt-sub">${i.sub}</div>`:''}</div>
-</div>`).join('');
-}
-
-/* ══════════════════════════════════════
-OVERVIEW TAB — Match Info / Team Statistics / Match Events,
-all built from real fields the football-data.org API provides.
-══════════════════════════════════════ */
-function renderMdOverview(m) {
-const panel = document.getElementById('panel-overview');
-const home = m.homeTeam, away = m.awayTeam;
-const mainRef = (m.referees||[]).find(r=>r.type==='REFEREE') || (m.referees||[])[0];
-
-// Match Info card — only real fields, each row omitted if the API didn't supply it.
-// Stadium: match.venue is preferred; openMatchDetail() resolves a fallback to the
-// home team's registered venue BEFORE calling this function (see __resolvedVenue),
-// so this render is fully synchronous — no async DOM patching, no race window.
-const stadiumDisplay = m.venue ? m.venue
-: m.__resolvedVenue ? m.__resolvedVenue
-: ('__resolvedVenue' in m) ? '<span style="color:var(--muted)">Not available</span>'
-: null;
-
-const infoRows = [
-stadiumDisplay && {icon:'🏟️', label:'Stadium', val:stadiumDisplay, _raw:true},
-mainRef?.name && {icon:'🟨', label:'Referee', val:mainRef.name},
-m.attendance && {icon:'👥', label:'Attendance', val:m.attendance.toLocaleString()},
-m.utcDate && {icon:'📅', label:'Date', val:new Date(m.utcDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})},
-m.matchday && {icon:'🔢', label:'Matchday', val:m.matchday},
-].filter(Boolean);
-
-const infoHTML = infoRows.length
-? infoRows.map(r=>`<div class="md-info-row"><span class="md-info-icon">${r.icon}</span><div><div class="md-info-label">${r.label}</div><div class="md-info-val">${r.val}</div></div></div>`).join('')
-: `<div class="md-no-stats-note">No match info available for this fixture.</div>`;
-
-// Team Statistics preview — first 6 rows, with a link to the full Stats tab
-const statRows = buildStatRows(m).slice(0,6);
-const statsHTML = statRows.length
-? mdStatBarHTML(statRows) + `<div style="text-align:center;margin-top:8px"><button class="act-btn" style="padding:6px 14px" onclick="document.querySelector('[data-panel=stats]').click()">View full stats ›</button></div>`
-: `<div class="md-no-stats-note">📊 Detailed statistics aren't provided by the data source for this fixture.</div>`;
-
-// Match Events — goals, cards, substitutions, all from real API arrays
-const goals = (m.goals||[]).map(g=>({min:g.minute, icon:'⚽', main:`${g.scorer?.name||'Goal'} ${g.type==='PENALTY'?'(Pen)':g.type==='OWN'?'(OG)':''}`.trim(), sub:g.assist?.name?`Assist: ${g.assist.name}`:(g.team?.name||'')}));
-const cards = (m.bookings||[]).map(b=>({min:b.minute, icon:b.card==='RED'?'🟥':'🟨', main:b.player?.name||'Card', sub:b.team?.name||''}));
-const subs = (m.substitutions||[]).map(s=>({min:s.minute, icon:'🔄', main:`${s.playerIn?.name||'?'} ⇄ ${s.playerOut?.name||'?'}`, sub:s.team?.name||''}));
-const events = [...goals,...cards,...subs].sort((a,b)=>(a.min??0)-(b.min??0));
-
-const eventsHTML = events.length
-? mdEventRowHTML(events)
-: `<div class="md-no-stats-note">No match events recorded yet.</div>`;
-
-panel.innerHTML = `<div class="md-ov-grid">
-<div style="display:flex;flex-direction:column;gap:14px">
-<div class="md-card"><div class="md-card-title">Match Info</div>${infoHTML}</div>
-</div>
-<div style="display:flex;flex-direction:column;gap:14px">
-<div class="md-card">
-<div class="md-ts-head"><span class="md-card-title">Team Statistics</span></div>
-<div class="md-ts-body">${statsHTML}</div>
-</div>
-<div class="md-card md-events-card">
-<div class="md-card-title">Match Events</div>
-${eventsHTML}
-</div>
-</div>
-</div>`;
-}
-
-function renderMdSquads(m) {
-const panel = document.getElementById('panel-squads');
-const homeLineup = m.homeTeam?.lineup || [];
-const awayLineup = m.awayTeam?.lineup || [];
-const bookings = m.bookings || [];
-
-if (!homeLineup.length && !awayLineup.length) {
-panel.innerHTML = `<div class="md-no-lineup-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">
-<div class="md-no-lineup">
-<div class="nl-icon">🧾</div>
-<div><strong>Lineups not available</strong></div>
-<div>Squad sheets for this match haven't been published yet, or this competition's lineup data isn't included on the current API plan.</div>
-</div>
-</div>`;
-return;
-}
-
-const dotsHTML = (lineup, isAway) => lineup.slice(0,11).map(p => {
-const pos = mdGridToPos(p.grid, 5, isAway);
-const sideClass = isAway ? 'away' : 'home';
-const initials = (p.name||'').split(' ').map(s=>s[0]).slice(0,2).join('');
-return `<div class="md-dot ${sideClass}" style="left:${pos.x}%;top:${pos.y}%" title="${p.name}">${p.shirtNumber||initials}
-<div class="md-dot-label">${(p.name||'').split(' ').pop()}</div></div>`;
-}).join('');
-
-panel.innerHTML = `<div class="md-pitch-wrap">
-<div class="md-side-list">
-${homeLineup.map(p=>mdPlayerRow(p,bookings)).join('') || '<div class="md-empty-panel">No squad list</div>'}
-</div>
-<div class="md-pitch">
-<div class="md-pitch-circle"></div>
-${dotsHTML(homeLineup,false)}
-${dotsHTML(awayLineup,true)}
-</div>
-<div class="md-side-list away">
-${awayLineup.map(p=>mdPlayerRow(p,bookings)).join('') || '<div class="md-empty-panel">No squad list</div>'}
-</div>
-</div>`;
-}
-
-function renderMdProgress(m) {
-const panel = document.getElementById('panel-progress');
-const goals = m.goals||[], bookings = m.bookings||[], subs = m.substitutions||[];
-const items = [
-...goals.map(g=>({min:g.minute,icon:'⚽',html:`<b>Goal</b> — ${g.scorer?.name||'Unknown'} (${g.team?.name||''})`})),
-...bookings.map(b=>({min:b.minute,icon:mdEventIcon(b.card),html:`<b>${b.card==='RED'?'Red card':'Yellow card'}</b> — ${b.player?.name||'Unknown'} (${b.team?.name||''})`})),
-...subs.map(s=>({min:s.minute,icon:'🔄',html:`<b>Substitution</b> — ${s.playerIn?.name||'?'} on for ${s.playerOut?.name||'?'} (${s.team?.name||''})`})),
-];
-items.sort((a,b)=>(a.min??0)-(b.min??0));
-
-if (!items.length) {
-panel.innerHTML = `<div class="md-empty-panel">⏱️ No match events recorded yet for this fixture.</div>`;
-return;
-}
-
-panel.innerHTML = `
-<div class="md-section-title">Timeline</div>
-<div class="md-progress-list">
-${items.map(i=>`<div class="md-prog-item"><span class="md-prog-min">${i.min??'-'}'</span><span class="md-prog-icon">${i.icon}</span><span class="md-prog-text">${i.html}</span></div>`).join('')}
-</div>`;
-}
-
-function renderMdStats(m) {
-const panel = document.getElementById('panel-stats');
-const rows = buildStatRows(m);
-
-if (!rows.length) {
-panel.innerHTML = `<div class="md-empty-panel">📊 Detailed match statistics aren't provided by the data source for this fixture.</div>`;
-return;
-}
-
-panel.innerHTML = `
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-<div style="display:flex;align-items:center;gap:8px">${crestImg(m.homeTeam,22)}<span style="font-weight:700">${m.homeTeam?.shortName||m.homeTeam?.name||''}</span></div>
-<div class="md-section-title" style="margin:0">Statistics</div>
-<div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700">${m.awayTeam?.shortName||m.awayTeam?.name||''}</span>${crestImg(m.awayTeam,22)}</div>
-</div>` + rows.map(r=>{
-const tot = (r.h+r.a) || 1;
-const hPct = (r.h/tot*100).toFixed(0), aPct = (r.a/tot*100).toFixed(0);
-return `<div class="md-stat-row">
-<div class="md-stat-labels"><b>${r.h}${r.suffix||''}</b><span>${r.label}</span><b>${r.a}${r.suffix||''}</b></div>
-<div class="md-stat-bar"><div class="home-fill" style="width:${hPct}%"></div><div class="away-fill" style="width:${aPct}%"></div></div>
-</div>`;
-}).join('');
-}
-
-function renderMdAnalytics(m) {
-const panel = document.getElementById('panel-analytics');
-const home = m.homeTeam, away = m.awayTeam;
-const mainRef = (m.referees||[]).find(r=>r.type==='REFEREE') || (m.referees||[])[0];
-const cards = [
-{label:'Competition', val: m.competition?.name || '—'},
-{label:'Matchday', val: m.matchday ?? '—'},
-{label:'Attendance', val: m.attendance ? m.attendance.toLocaleString() : '—'},
-{label:'Home Formation', val: home?.formation || '—'},
-{label:'Away Formation', val: away?.formation || '—'},
-{label:'Home Coach', val: home?.coach?.name || '—'},
-{label:'Away Coach', val: away?.coach?.name || '—'},
-{label:'Referee', val: mainRef?.name || '—'},
-];
-if (m.odds && (m.odds.homeWin || m.odds.draw || m.odds.awayWin)) {
-cards.push({label:'Odds (H / D / A)', val: `${m.odds.homeWin ?? '–'} / ${m.odds.draw ?? '–'} / ${m.odds.awayWin ?? '–'}`});
-}
-panel.innerHTML = `<div class="md-section-title">Analytics</div>
-<div class="md-analytics-grid">
-${cards.map(c=>`<div class="md-an-card"><h4>${c.label}</h4><div class="md-an-val">${c.val}</div></div>`).join('')}
-</div>`;
-}
-
 
 function buildStandingsHTML(data, code, name, flag, slot) {
 const standings = data.standings || [];
 const meta = LMETA[code] || {};
-// Prefer the real flag image the API returns over a hardcoded emoji — this also
-// makes standings work correctly for leagues outside our original hardcoded list.
-const flagHTML = data.area?.flag
-? `<img src="${data.area.flag}" style="width:18px;height:13px;object-fit:contain;vertical-align:middle" onerror="this.outerHTML='${flag}'">`
-: flag;
-
-// Multiple TOTAL groups → group stage (WC, CL, EC)
 const totalGroups = standings.filter(s => s.type === 'TOTAL');
+
 if (totalGroups.length > 1) {
 const groupsHTML = totalGroups.map(g => {
 const label = (g.group || '').replace('GROUP_','Group ').replace(/_/g,' ') || 'Group';
 const rows = (g.table || []).map(r => `
 <tr>
 <td>${r.position}</td>
-<td>${crestImg(r.team,13)} ${r.team.shortName||r.team.name}</td>
+<td><img src="${r.team.crest||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.shortName||r.team.name}</td>
 <td>${r.playedGames}</td><td>${r.won}</td><td>${r.draw}</td><td>${r.lost}</td>
 <td>${r.goalDifference>=0?'+':''}${r.goalDifference}</td>
 <td class="pts">${r.points}</td>
@@ -1157,13 +478,12 @@ return `<div class="wc-group">
 }).join('');
 slot.innerHTML = `
 <div class="st-panel">
-<div class="stp-head"><span class="stp-flag">${flagHTML}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="stp-head"><span class="stp-flag">${flag}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
 ${groupsHTML}
 </div>`;
 return;
 }
 
-// Single league table
 const table = totalGroups[0]?.table || standings[0]?.table || [];
 const z = meta.z;
 const zClass = (pos, tot) => {
@@ -1176,22 +496,20 @@ return '';
 const rows = table.map(r => `
 <tr class="${zClass(r.position, table.length)}">
 <td>${r.position}</td>
-<td>${crestImg(r.team,13)} ${r.team.shortName||r.team.name}</td>
+<td><img src="${r.team.crest||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.shortName||r.team.name}</td>
 <td>${r.playedGames}</td><td>${r.won}</td><td>${r.draw}</td><td>${r.lost}</td>
 <td>${r.goalDifference>=0?'+':''}${r.goalDifference}</td>
 <td class="pts">${r.points}</td>
 </tr>`).join('');
-
 const legend = z ? `
 <div class="stp-legend">
 ${z.ucl ? `<div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>UCL</div>` : ''}
 ${z.uel ? `<div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>UEL</div>` : ''}
 ${z.rel ? `<div class="leg-item"><div class="leg-dot" style="background:var(--live)"></div>Relegation</div>` : ''}
 </div>` : '';
-
 slot.innerHTML = `
 <div class="st-panel">
-<div class="stp-head"><span class="stp-flag">${flagHTML}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="stp-head"><span class="stp-flag">${flag}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
 <table class="stp-table">
 <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead>
 <tbody>${rows}</tbody>
@@ -1211,19 +529,20 @@ if (!m) { el.innerHTML='<p style="text-align:center;color:var(--muted);padding:1
 const hs = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? '–';
 const as = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? '–';
 const isLive = m.status==='IN_PLAY';
+const mins = isLive ? estimateMinute(m) : null;
 el.innerHTML = `
 <div class="feat-teams">
 <div class="feat-team">
-${m.homeTeam.crest ? `<img src="${m.homeTeam.crest}" class="feat-logo" onerror="this.outerHTML='<div class=feat-logo style=\'display:flex;align-items:center;justify-content:center;font-size:20px\'>⚽</div>'">` : `<div class="feat-logo" style="display:flex;align-items:center;justify-content:center;font-size:20px">⚽</div>`}
+<img src="${m.homeTeam.crest||''}" class="feat-logo" onerror="this.style.display='none'">
 <div class="feat-name">${m.homeTeam.shortName||m.homeTeam.name}</div>
 </div>
 <div class="feat-score">${hs}&nbsp;–&nbsp;${as}</div>
 <div class="feat-team">
-${m.awayTeam.crest ? `<img src="${m.awayTeam.crest}" class="feat-logo" onerror="this.outerHTML='<div class=feat-logo style=\'display:flex;align-items:center;justify-content:center;font-size:20px\'>⚽</div>'">` : `<div class="feat-logo" style="display:flex;align-items:center;justify-content:center;font-size:20px">⚽</div>`}
+<img src="${m.awayTeam.crest||''}" class="feat-logo" onerror="this.style.display='none'">
 <div class="feat-name">${m.awayTeam.shortName||m.awayTeam.name}</div>
 </div>
 </div>
-<div class="feat-meta">${isLive?'<span class="feat-live-dot">● LIVE</span> &nbsp;':''}${m.competition.name}</div>`;
+<div class="feat-meta">${isLive?`<span class="feat-live-dot">● LIVE ${minuteLabel(mins, m.status)}</span> &nbsp;`:''}${m.competition.name}</div>`;
 }
 
 /* ══════════════════════════════════════
@@ -1231,11 +550,13 @@ MATCH ROW HELPERS
 ══════════════════════════════════════ */
 function statusHTML(m) {
 const s = m.status;
-if (s==='IN_PLAY') return `<div class="st live">LIVE</div><span class="min">${m.minute?m.minute+"'":'●'}</span>`;
+if (s==='IN_PLAY') {
+const mins = estimateMinute(m);
+return `<div class="st live">LIVE</div><span class="min">${minuteLabel(mins, s)}</span>`;
+}
 if (s==='PAUSED') return `<div class="st ht">HT</div>`;
 if (s==='FINISHED') return `<div class="st ft">FT</div>`;
 if (s==='POSTPONED')return `<div class="st pp">PP</div>`;
-// Upcoming — show local time + tz label
 return `<div class="st ns">${localTime(m.utcDate)}</div><span class="tz-label">${tzShort}</span>`;
 }
 
@@ -1273,11 +594,9 @@ const sf = chipFilter !== 'all' ? chipFilter
 if (sf==='live') list = list.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED');
 if (sf==='finished') list = list.filter(m=>m.status==='FINISHED');
 if (sf==='upcoming') list = list.filter(m=>m.status==='TIMED'||m.status==='SCHEDULED');
-
 if (!['all','live','finished','upcoming'].includes(sideFilter))
 list = list.filter(m=>m.competition.code===sideFilter);
 
-// Sort by local time
 list.sort((a,b)=>new Date(a.utcDate)-new Date(b.utcDate));
 
 const container = document.getElementById('matchesContainer');
@@ -1286,7 +605,6 @@ container.innerHTML = '<div class="err-box"><div class="ei">📭</div><p>No matc
 return;
 }
 
-// Group by competition
 const groups = {};
 list.forEach(m => {
 const k = m.competition.id;
@@ -1310,13 +628,14 @@ return `<div class="league-block">
 </div>
 <div class="league-matches">
 ${g.matches.map(m=>`
-<div class="match-row" onclick="openMatchDetail('${m.id}')">
+<div class="match-row">
 <div class="match-time">${statusHTML(m)}</div>
 <div class="team home">${logoHTML(m.homeTeam)}<span>${m.homeTeam.shortName||m.homeTeam.name}</span></div>
 ${scoreHTML(m)}
 <div class="team away"><span>${m.awayTeam.shortName||m.awayTeam.name}</span>${logoHTML(m.awayTeam)}</div>
-<div class="match-acts"><button class="act-btn" onclick="event.stopPropagation();openMatchDetail('${m.id}')">Stats</button></div>
-</div>`).join('')}
+<div class="match-acts"><button class="act-btn" onclick="event.stopPropagation();toggleScorers(${m.id},this)">⚽ Scorers</button></div>
+</div>
+<div class="scorers-row hidden" id="scorers-${m.id}"></div>`).join('')}
 </div>
 </div>`;
 }).join('');
@@ -1334,7 +653,9 @@ return;
 const items = live.map(m => {
 const hs = m.score?.fullTime?.home??m.score?.halfTime?.home??0;
 const as = m.score?.fullTime?.away??m.score?.halfTime?.away??0;
-return `<span class="tick-item"><span class="tick-dot"></span><strong>${m.homeTeam.shortName||m.homeTeam.name}</strong> ${hs}–${as} <strong>${m.awayTeam.shortName||m.awayTeam.name}</strong></span>`;
+const mins = m.status==='IN_PLAY' ? estimateMinute(m) : null;
+const minTxt = m.status==='IN_PLAY' ? ` ${minuteLabel(mins, m.status)}` : ' HT';
+return `<span class="tick-item"><span class="tick-dot"></span><strong>${m.homeTeam.shortName||m.homeTeam.name}</strong> ${hs}–${as} <strong>${m.awayTeam.shortName||m.awayTeam.name}</strong>${minTxt}</span>`;
 });
 document.getElementById('ticker').innerHTML = [...items,...items].join('');
 }
@@ -1347,89 +668,6 @@ document.getElementById('sc-live').textContent = n;
 }
 
 /* ══════════════════════════════════════
-DYNAMIC LEAGUE SIDEBAR
-Builds one row + Table/Groups button per competition actually present
-in today's matches, instead of relying on a fixed hardcoded list.
-══════════════════════════════════════ */
-function refreshLeagueSidebar() {
-const container = document.getElementById('dynLeagues');
-// Collect distinct competitions from today's (already free-tier-filtered) matches
-const seen = new Map();
-allMatches.forEach(m => {
-const code = m.competition?.code;
-if (code && !seen.has(code)) seen.set(code, m.competition);
-});
-
-if (!seen.size) {
-container.innerHTML = '<div class="no-st" style="padding:10px 14px;text-align:left">No covered leagues playing today</div>';
-return;
-}
-
-container.innerHTML = '';
-[...seen.entries()].sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([code, info]) => {
-const meta = LMETA[code] || {};
-const isGroupStage = code==='WC' || code==='EC' || code==='CL' || code==='EL';
-const row = document.createElement('div');
-row.className = 'ls-row';
-row.innerHTML = `<span>${meta.flag||'🏆'}</span><span class="ls-name">${info.name}</span><button class="ls-btn">${isGroupStage?'Groups':'Table'}</button>`;
-row.querySelector('.ls-name').onclick = () => setSidebar(code, row);
-row.querySelector('.ls-btn').onclick = () => triggerStandings(code, info.name, meta.flag||'🏆', row.querySelector('.ls-btn'));
-container.appendChild(row);
-});
-}
-
-/* ══════════════════════════════════════
-ALT LEAGUES SIDEBAR — Argentina, Morocco, etc, sourced from API-Football.
-Nothing here fetches automatically; every request is a direct result of a
-tap, to respect the 100-requests/day free-tier budget on this second API.
-══════════════════════════════════════ */
-const altLoadedKeys = new Set(); // which alt leagues the user has already loaded this session
-
-function renderAltLeaguesSidebar() {
-const container = document.getElementById('altLeagues');
-container.innerHTML = '';
-Object.entries(ALT_LEAGUES).forEach(([key, meta]) => {
-const row = document.createElement('div');
-row.className = 'ls-row';
-const disabled = !meta.id;
-const loaded = altLoadedKeys.has(key);
-row.innerHTML = `<span>${meta.flag}</span><span class="ls-name" style="${disabled?'color:var(--muted)':''}">${meta.name}</span>
-<button class="ls-btn" ${disabled?'disabled style="opacity:.4;cursor:not-allowed"':''}>${disabled ? 'No ID set' : (loaded ? 'Reload' : 'Load')}</button>`;
-if (!disabled) {
-const btn = row.querySelector('.ls-btn');
-btn.onclick = () => loadAltLeagueIntoApp(key, btn, row);
-}
-container.appendChild(row);
-});
-}
-
-async function loadAltLeagueIntoApp(key, btn, row) {
-const meta = ALT_LEAGUES[key];
-const originalLabel = btn.textContent;
-btn.textContent = '…';
-btn.disabled = true;
-try {
-const matches = await loadAltLeagueMatches(key);
-// Remove any previously-loaded matches from this same alt league, then add fresh ones
-allMatches = allMatches.filter(m => m.competition?.code !== key);
-allMatches.push(...matches);
-altLoadedKeys.add(key);
-render(); updateTicker(); updateCounters();
-btn.textContent = 'Reload';
-if (!matches.length) {
-btn.title = 'No matches found for today in this league';
-}
-// Jump the user straight to this league's matches so the tap feels useful
-setSidebar(key, row);
-} catch(e) {
-console.log('[altLeague] failed to load ' + key + ':', e.message);
-btn.textContent = 'Failed — retry';
-} finally {
-btn.disabled = false;
-}
-}
-
-/* ══════════════════════════════════════
 DATE STRIP — built in LOCAL dates
 ══════════════════════════════════════ */
 function buildDateStrip() {
@@ -1438,8 +676,8 @@ const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 strip.innerHTML = '';
 const now = new Date();
 for (let i = -3; i <= 4; i++) {
-const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i); // LOCAL midnight
-const ds = localDateStr(d); // local YYYY-MM-DD
+const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+const ds = localDateStr(d);
 const pill = document.createElement('div');
 pill.className = 'date-pill' + (i===0?' active':'');
 pill.innerHTML = `<div class="dp-day">${i===0?'Today':days[d.getDay()]}</div><div class="dp-num">${d.getDate()}</div>`;
@@ -1468,52 +706,14 @@ render();
 }
 document.getElementById('searchInput').addEventListener('input', e=>{searchTerm=e.target.value.trim();render();});
 
-/* Auto-refresh every 60s */
+/* Auto-refresh every 60s (also keeps live minutes ticking) */
 setInterval(()=>loadMatches(activeDate), 60000);
+/* Re-render every 15s so the live minute counts up smoothly between full reloads */
+setInterval(()=>{ if (allMatches.some(m=>m.status==='IN_PLAY')) { render(); renderFeatured(); updateTicker(); } }, 15000);
 
 /* ── INIT ── */
-/* ══════════════════════════════════════
-PERMANENT LEAGUE QUICK-LIST in right panel
-All 12 covered leagues always visible with Table/Groups buttons,
-regardless of which leagues have matches today.
-══════════════════════════════════════ */
-function buildLeagueQuickList() {
-const container = document.getElementById('leagueQuickList');
-if (!container) return;
-const leagues = [
-{code:'PL', name:'Premier League', flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', label:'Table'},
-{code:'PD', name:'La Liga', flag:'🇪🇸', label:'Table'},
-{code:'BL1', name:'Bundesliga', flag:'🇩🇪', label:'Table'},
-{code:'SA', name:'Serie A', flag:'🇮🇹', label:'Table'},
-{code:'FL1', name:'Ligue 1', flag:'🇫🇷', label:'Table'},
-{code:'CL', name:'Champions League', flag:'🇪🇺', label:'Groups'},
-{code:'EL', name:'Europa League', flag:'🟠', label:'Groups'},
-{code:'PPL', name:'Primeira Liga', flag:'🇵🇹', label:'Table'},
-{code:'DED', name:'Eredivisie', flag:'🇳🇱', label:'Table'},
-{code:'WC', name:'World Cup', flag:'🌍', label:'Groups'},
-{code:'EC', name:'Euro Champ.', flag:'🏆', label:'Groups'},
-{code:'BSA', name:'Brasileirão', flag:'🇧🇷', label:'Table'},
-];
-container.innerHTML = leagues.map(l => `
-<div class="lq-row">
-<span class="lq-flag">${l.flag}</span>
-<span class="lq-name">${l.name}</span>
-<button class="lq-btn" id="lqbtn-${l.code}" onclick="triggerStandingsFromPanel('${l.code}','${l.name}','${l.flag}',this)">${l.label}</button>
-</div>`).join('');
-}
-
-// Wrapper so clicking a right-panel league button opens standings inline in
-// the standingsSlot (same as the sidebar Table buttons), auto-opening the
-// drawer on mobile so the user actually sees the result.
-function triggerStandingsFromPanel(code, name, flag, btn) {
-if (window.innerWidth <= 980) toggleRightPanel(true);
-triggerStandings(code, name, flag, btn);
-}
-
 buildDateStrip();
 loadMatches(activeDate);
-renderAltLeaguesSidebar();
-buildLeagueQuickList();
 </script>
 </body>
 </html>
