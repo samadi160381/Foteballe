@@ -300,6 +300,8 @@ MATCH DETAIL OVERLAY
 <div id="dynLeagues">
 <div class="no-st" style="padding:10px 14px;text-align:left">Loading…</div>
 </div>
+<div class="sidebar-label">More Leagues <span style="font-weight:400;text-transform:none;letter-spacing:0">(loads on tap)</span></div>
+<div id="altLeagues"></div>
 </aside>
 <main>
 <div class="top-strip">
@@ -431,6 +433,35 @@ Anything else (friendlies, uncovered leagues/cups) returns thin/empty data, so w
 hide those matches entirely rather than show a broken-looking card. */
 const FREE_TIER_CODES = new Set(['PL','PD','BL1','SA','FL1','CL','EL','EC','WC','DED','PPL','BSA']);
 
+/* ══════════════════════════════════════
+ALT LEAGUES — second data source (API-Football), used ONLY when the user
+explicitly opens this section. Never included in the auto-refresh loop or
+the main match list, since the free API-Football tier is only 100 requests
+per day total (vs football-data.org's ~14,000/day) — see altApiFetch().
+
+League IDs are API-Football's own numeric ids, found via their dashboard at
+dashboard.api-football.com/soccer/ids/leagues (search the league by name).
+══════════════════════════════════════ */
+const ALT_LEAGUES = {
+MA_BOTOLA: { id: 200, name: 'Botola Pro', flag: '🇲🇦', country: 'Morocco' },
+// Argentina's Liga Profesional id could not be confirmed from documentation —
+// look it up at dashboard.api-football.com/soccer/ids/leagues (search "Argentina")
+// and paste the numeric id below to enable it.
+AR_LIGA: { id: null, name: 'Liga Profesional', flag: '🇦🇷', country: 'Argentina' },
+};
+const ALT_SEASON = 2026; // API-Football's "season" param; update each year
+
+async function altApiFetch(path) {
+const clean = path.replace(/^\/+/,'');
+const url = isLocal
+? `https://v3.football.api-sports.io/${clean}`
+: `/api/altfootball?path=${encodeURIComponent(clean)}`;
+const headers = isLocal ? {'x-apisports-key':'73c725b077b7969f8ea3a111bea9327d'} : {};
+const r = await fetch(url, {headers});
+if (!r.ok) { const t=await r.text().catch(()=>''); throw new Error(`HTTP ${r.status}: ${t.slice(0,120)}`); }
+return r.json();
+}
+
 /* Manual venue overrides, keyed by football-data.org match id.
 Use this when the API hasn't published a venue yet for a real, known fixture
 (common for World Cup knockout matches right as brackets lock in) — add an
@@ -452,6 +483,52 @@ const VENUE_OVERRIDES = {
 };
 function isCoveredMatch(m) {
 return FREE_TIER_CODES.has(m.competition?.code);
+}
+
+/* Converts one API-Football fixture object into the same shape every render
+function in this app already expects (the football-data.org match shape).
+This is what lets Argentina/Morocco matches flow through the exact same
+match-row rendering, hero, and Overview tab as everything else, without a
+parallel UI. Only fields that are actually used downstream are mapped —
+this is NOT a full 1:1 schema translation. */
+function adaptAltFixture(fx, leagueMeta) {
+const statusMap = {
+'1H':'IN_PLAY','2H':'IN_PLAY','ET':'IN_PLAY','P':'IN_PLAY','LIVE':'IN_PLAY',
+'HT':'PAUSED',
+'FT':'FINISHED','AET':'FINISHED','PEN':'FINISHED',
+'NS':'TIMED',
+'PST':'POSTPONED','CANC':'POSTPONED','ABD':'POSTPONED',
+};
+const shortStatus = fx.fixture?.status?.short || 'NS';
+return {
+id: `alt_${fx.fixture.id}`, // prefixed so it never collides with a football-data.org numeric id
+_altSource: true, // flag so openMatchDetail knows to route this through altApiFetch
+_altFixtureId: fx.fixture.id,
+utcDate: fx.fixture.date,
+status: statusMap[shortStatus] || 'TIMED',
+minute: fx.fixture?.status?.elapsed ?? null,
+venue: fx.fixture?.venue?.name || null,
+attendance: null, // not provided by this endpoint
+matchday: null,
+stage: fx.league?.round || null,
+referees: fx.fixture?.referee ? [{name: fx.fixture.referee.split(',')[0].trim(), type:'REFEREE'}] : [],
+competition: { id: `alt_${leagueMeta.id}`, code: leagueMeta.code, name: leagueMeta.name },
+homeTeam: { id: fx.teams.home.id, name: fx.teams.home.name, shortName: fx.teams.home.name, crest: fx.teams.home.logo },
+awayTeam: { id: fx.teams.away.id, name: fx.teams.away.name, shortName: fx.teams.away.name, crest: fx.teams.away.logo },
+score: { fullTime: { home: fx.goals?.home ?? null, away: fx.goals?.away ?? null } },
+goals: [], bookings: [], substitutions: [], // populated separately on detail open, not in the list view
+};
+}
+
+/* Fetches today's fixtures for one ALT_LEAGUES entry. Only called when the user
+explicitly opens that league's section — never from the auto-refresh loop. */
+async function loadAltLeagueMatches(key) {
+const meta = ALT_LEAGUES[key];
+if (!meta || !meta.id) return [];
+const todayStr = new Date().toISOString().slice(0,10);
+const data = await altApiFetch(`fixtures?league=${meta.id}&season=${ALT_SEASON}&date=${todayStr}`);
+const fixtures = data?.response || [];
+return fixtures.map(fx => adaptAltFixture(fx, {...meta, code: key}));
 }
 
 async function apiFetch(path) {
@@ -606,8 +683,37 @@ document.getElementById('panel-overview').innerHTML =
 ['squads','progress','stats','analytics'].forEach(p=>document.getElementById('panel-'+p).innerHTML='');
 
 // Start from whatever we already have in allMatches so the header fills in instantly
-const cached = allMatches.find(m => m.id === matchId);
+const cached = allMatches.find(m => String(m.id) === String(matchId));
 if (cached) renderMdHero(cached);
+
+// Matches loaded from the alt source (Argentina/Morocco via API-Football) need a
+// completely different detail call — they don't exist in football-data.org at all.
+if (cached?._altSource) {
+try {
+const data = await altApiFetch(`fixtures?id=${cached._altFixtureId}`);
+const fx = data?.response?.[0];
+if (!fx) throw new Error('Fixture not found');
+const full = adaptAltFixture(fx, {id: cached.competition.id, code: cached.competition.code, name: cached.competition.name});
+// API-Football's events array maps cleanly to goals/bookings/substitutions
+const events = fx.events || [];
+full.goals = events.filter(e=>e.type==='Goal').map(e=>({minute:e.time?.elapsed, type: e.detail?.toUpperCase().includes('OWN')?'OWN':(e.detail?.toUpperCase().includes('PEN')?'PENALTY':'REGULAR'), team:{id:e.team?.id,name:e.team?.name}, scorer:{name:e.player?.name}, assist: e.assist?.name?{name:e.assist.name}:null}));
+full.bookings = events.filter(e=>e.type==='Card').map(e=>({minute:e.time?.elapsed, card: e.detail?.toUpperCase().includes('RED')?'RED':'YELLOW', team:{id:e.team?.id,name:e.team?.name}, player:{name:e.player?.name}}));
+full.substitutions = events.filter(e=>e.type==='subst').map(e=>({minute:e.time?.elapsed, team:{id:e.team?.id,name:e.team?.name}, playerOut:{name:e.player?.name}, playerIn:{name:e.assist?.name}}));
+full.score = { fullTime: { home: fx.goals?.home ?? null, away: fx.goals?.away ?? null } };
+mdCurrentMatch = full;
+renderMdHero(full);
+renderMdOverview(full); // venue comes straight from fixture.venue.name — no extra lookup call needed
+renderMdSquads(full); // will show "Lineups not available" since lineups need a separate altApiFetch call we don't make by default
+renderMdProgress(full);
+renderMdStats(full);
+renderMdAnalytics(full);
+} catch(e) {
+mdCurrentMatch = cached;
+renderMdOverview(cached);
+document.getElementById('panel-overview').innerHTML += `<div class="md-empty-panel" style="margin-top:10px">⚠️ Couldn't load full details from the alt source<br><small>${e.message}</small></div>`;
+}
+return;
+}
 
 try {
 const full = await apiFetch(`matches/${matchId}`);
@@ -1163,12 +1269,12 @@ return `<div class="league-block">
 </div>
 <div class="league-matches">
 ${g.matches.map(m=>`
-<div class="match-row" onclick="openMatchDetail(${m.id})">
+<div class="match-row" onclick="openMatchDetail('${m.id}')">
 <div class="match-time">${statusHTML(m)}</div>
 <div class="team home">${logoHTML(m.homeTeam)}<span>${m.homeTeam.shortName||m.homeTeam.name}</span></div>
 ${scoreHTML(m)}
 <div class="team away"><span>${m.awayTeam.shortName||m.awayTeam.name}</span>${logoHTML(m.awayTeam)}</div>
-<div class="match-acts"><button class="act-btn" onclick="event.stopPropagation();openMatchDetail(${m.id})">Stats</button></div>
+<div class="match-acts"><button class="act-btn" onclick="event.stopPropagation();openMatchDetail('${m.id}')">Stats</button></div>
 </div>`).join('')}
 </div>
 </div>`;
@@ -1232,6 +1338,57 @@ container.appendChild(row);
 }
 
 /* ══════════════════════════════════════
+ALT LEAGUES SIDEBAR — Argentina, Morocco, etc, sourced from API-Football.
+Nothing here fetches automatically; every request is a direct result of a
+tap, to respect the 100-requests/day free-tier budget on this second API.
+══════════════════════════════════════ */
+const altLoadedKeys = new Set(); // which alt leagues the user has already loaded this session
+
+function renderAltLeaguesSidebar() {
+const container = document.getElementById('altLeagues');
+container.innerHTML = '';
+Object.entries(ALT_LEAGUES).forEach(([key, meta]) => {
+const row = document.createElement('div');
+row.className = 'ls-row';
+const disabled = !meta.id;
+const loaded = altLoadedKeys.has(key);
+row.innerHTML = `<span>${meta.flag}</span><span class="ls-name" style="${disabled?'color:var(--muted)':''}">${meta.name}</span>
+<button class="ls-btn" ${disabled?'disabled style="opacity:.4;cursor:not-allowed"':''}>${disabled ? 'No ID set' : (loaded ? 'Reload' : 'Load')}</button>`;
+if (!disabled) {
+const btn = row.querySelector('.ls-btn');
+btn.onclick = () => loadAltLeagueIntoApp(key, btn, row);
+}
+container.appendChild(row);
+});
+}
+
+async function loadAltLeagueIntoApp(key, btn, row) {
+const meta = ALT_LEAGUES[key];
+const originalLabel = btn.textContent;
+btn.textContent = '…';
+btn.disabled = true;
+try {
+const matches = await loadAltLeagueMatches(key);
+// Remove any previously-loaded matches from this same alt league, then add fresh ones
+allMatches = allMatches.filter(m => m.competition?.code !== key);
+allMatches.push(...matches);
+altLoadedKeys.add(key);
+render(); updateTicker(); updateCounters();
+btn.textContent = 'Reload';
+if (!matches.length) {
+btn.title = 'No matches found for today in this league';
+}
+// Jump the user straight to this league's matches so the tap feels useful
+setSidebar(key, row);
+} catch(e) {
+console.log('[altLeague] failed to load ' + key + ':', e.message);
+btn.textContent = 'Failed — retry';
+} finally {
+btn.disabled = false;
+}
+}
+
+/* ══════════════════════════════════════
 DATE STRIP — built in LOCAL dates
 ══════════════════════════════════════ */
 function buildDateStrip() {
@@ -1276,6 +1433,7 @@ setInterval(()=>loadMatches(activeDate), 60000);
 /* ── INIT ── */
 buildDateStrip();
 loadMatches(activeDate);
+renderAltLeaguesSidebar();
 </script>
 </body>
 </html>
