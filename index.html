@@ -68,8 +68,10 @@ main{flex:1;padding:18px;min-width:0}
 .lh-st-btn.on{background:var(--accent);border-color:var(--accent);color:#000}
 .lh-chev{color:var(--muted);font-size:11px;cursor:pointer;margin-left:4px;transition:transform .2s;flex-shrink:0}
 .league-block.collapsed .lh-chev{transform:rotate(-90deg)}.league-block.collapsed .league-matches{display:none}
-.match-row{display:grid;grid-template-columns:76px 1fr auto 1fr 64px;align-items:center;gap:8px;padding:9px 13px;background:var(--card);border-top:1px solid var(--border);cursor:pointer;transition:background .12s}
+.match-row{display:grid;grid-template-columns:76px 1fr auto 1fr 18px;align-items:center;gap:8px;padding:9px 13px;background:var(--card);border-top:1px solid var(--border);cursor:pointer;transition:background .12s}
 .match-row:hover{background:#1e2438}
+.match-row:hover .row-arrow{color:var(--accent)}
+.row-arrow{color:var(--muted);font-size:13px;text-align:center;transition:color .15s}
 .match-time{text-align:center;font-size:12px;line-height:1.5}
 .st{font-weight:700;font-size:11px;padding:2px 6px;border-radius:4px;display:inline-block}
 .st.live{background:var(--live);color:#fff;animation:lb 1.8s ease-in-out infinite}
@@ -86,18 +88,9 @@ main{flex:1;padding:18px;min-width:0}
 .score-box{display:flex;gap:5px;align-items:center;font-family:var(--fd);font-size:25px;font-weight:800;min-width:54px;justify-content:center}
 .score-box .dash{color:var(--muted);font-size:17px}
 .sc{line-height:1}.sc.w{color:var(--green)}
-.match-acts{display:flex;gap:3px;justify-content:flex-end}
-.act-btn{font-size:10px;padding:3px 7px;border-radius:4px;border:1px solid var(--border);color:var(--sub);transition:all .15s}
-.act-btn:hover{border-color:var(--accent);color:var(--accent)}
-.scorers-row{grid-column:1/-1;background:var(--surface);border-top:1px solid var(--border);padding:8px 13px;font-size:11.5px;color:var(--sub)}
-.scorers-row.hidden{display:none}
-.scorers-loading{color:var(--muted)}
-.goal-line{display:flex;align-items:center;gap:6px;padding:2px 0}
-.goal-line .gl-min{color:var(--live);font-weight:700;width:34px;flex-shrink:0}
-.goal-line .gl-side{width:14px;text-align:center;flex-shrink:0}
 /* RIGHT PANEL */
 .right-panel{width:310px;flex-shrink:0;border-left:1px solid var(--border);position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:14px}
-.feat-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden;flex-shrink:0}
+.feat-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden;flex-shrink:0;cursor:pointer}
 .feat-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(0,194,255,.1),transparent 60%);pointer-events:none}
 .feat-label{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
 .feat-teams{display:flex;align-items:center;justify-content:space-between}
@@ -147,7 +140,7 @@ footer a{color:var(--accent)}
 @media(max-width:1150px){.right-panel{width:270px}}
 @media(max-width:980px){.right-panel{display:none}}
 @media(max-width:760px){aside{display:none}}
-@media(max-width:560px){header{padding:0 10px}.search-box{display:none}.tz-badge{display:none}main{padding:10px}.match-row{grid-template-columns:60px 1fr auto 1fr}.match-acts{display:none}.score-box{font-size:20px;min-width:44px}}
+@media(max-width:560px){header{padding:0 10px}.search-box{display:none}.tz-badge{display:none}main{padding:10px}.match-row{grid-template-columns:60px 1fr auto 1fr 14px}.score-box{font-size:20px;min-width:44px}}
 </style>
 </head>
 <body>
@@ -168,18 +161,7 @@ footer a{color:var(--accent)}
 <div class="sidebar-item" onclick="setSidebar('finished',this)">✅ Finished</div>
 <div class="sidebar-item" onclick="setSidebar('upcoming',this)">🕐 Upcoming</div>
 <div class="sidebar-label">Leagues & Standings</div>
-<div class="ls-row"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿</span><span class="ls-name" onclick="setSidebar('PL',this.closest('.ls-row'))">Premier League</span><button class="ls-btn" onclick="triggerStandings('PL','Premier League','🏴󠁧󠁢󠁥󠁮󠁧󠁿',this)">Table</button></div>
-<div class="ls-row"><span>🇪🇸</span><span class="ls-name" onclick="setSidebar('PD',this.closest('.ls-row'))">La Liga</span><button class="ls-btn" onclick="triggerStandings('PD','La Liga','🇪🇸',this)">Table</button></div>
-<div class="ls-row"><span>🇩🇪</span><span class="ls-name" onclick="setSidebar('BL1',this.closest('.ls-row'))">Bundesliga</span><button class="ls-btn" onclick="triggerStandings('BL1','Bundesliga','🇩🇪',this)">Table</button></div>
-<div class="ls-row"><span>🇮🇹</span><span class="ls-name" onclick="setSidebar('SA',this.closest('.ls-row'))">Serie A</span><button class="ls-btn" onclick="triggerStandings('SA','Serie A','🇮🇹',this)">Table</button></div>
-<div class="ls-row"><span>🇫🇷</span><span class="ls-name" onclick="setSidebar('FL1',this.closest('.ls-row'))">Ligue 1</span><button class="ls-btn" onclick="triggerStandings('FL1','Ligue 1','🇫🇷',this)">Table</button></div>
-<div class="ls-row"><span>🇪🇺</span><span class="ls-name" onclick="setSidebar('CL',this.closest('.ls-row'))">Champions League</span><button class="ls-btn" onclick="triggerStandings('CL','Champions League','🇪🇺',this)">Table</button></div>
-<div class="ls-row"><span>🟠</span><span class="ls-name" onclick="setSidebar('EL',this.closest('.ls-row'))">Europa League</span><button class="ls-btn" onclick="triggerStandings('EL','Europa League','🟠',this)">Table</button></div>
-<div class="ls-row"><span>🇵🇹</span><span class="ls-name" onclick="setSidebar('PPL',this.closest('.ls-row'))">Primeira Liga</span><button class="ls-btn" onclick="triggerStandings('PPL','Primeira Liga','🇵🇹',this)">Table</button></div>
-<div class="ls-row"><span>🇳🇱</span><span class="ls-name" onclick="setSidebar('DED',this.closest('.ls-row'))">Eredivisie</span><button class="ls-btn" onclick="triggerStandings('DED','Eredivisie','🇳🇱',this)">Table</button></div>
-<div class="ls-row"><span>🌍</span><span class="ls-name" onclick="setSidebar('WC',this.closest('.ls-row'))">World Cup</span><button class="ls-btn" onclick="triggerStandings('WC','World Cup 2026','🌍',this)">Groups</button></div>
-<div class="ls-row"><span>🏆</span><span class="ls-name" onclick="setSidebar('EC',this.closest('.ls-row'))">Euro Champ.</span><button class="ls-btn" onclick="triggerStandings('EC','Euro Championship','🏆',this)">Groups</button></div>
-<div class="ls-row"><span>🇧🇷</span><span class="ls-name" onclick="setSidebar('BSA',this.closest('.ls-row'))">Brasileirão</span><button class="ls-btn" onclick="triggerStandings('BSA','Brasileirão','🇧🇷',this)">Table</button></div>
+<div id="leagueSidebar"></div>
 </aside>
 <main>
 <div class="top-strip">
@@ -200,7 +182,7 @@ footer a{color:var(--accent)}
 <div id="matchesContainer"><div class="loading-state"><div class="spinner"></div><p>Fetching live scores…</p></div></div>
 </main>
 <div class="right-panel" id="rightPanel">
-<div class="feat-card">
+<div class="feat-card" id="featCard">
 <div class="feat-label">⚡ Top Match Today</div>
 <div id="featContent"><div style="text-align:center;color:var(--muted);padding:14px 0;font-size:12px">Loading…</div></div>
 </div>
@@ -209,10 +191,10 @@ footer a{color:var(--accent)}
 </div>
 </div>
 </div>
-<footer><p>© 2026 GoalPulse · All times in your local timezone · Data: <a href="https://football-data.org" target="_blank">football-data.org</a></p></footer>
+<footer><p>© 2026 GoalPulse · All times in your local timezone · Data: <a href="https://www.api-football.com" target="_blank">API-Football</a></p></footer>
 <script>
 /* ══════════════════════════════════════
-TIMEZONE — everything in LOCAL time
+TIMEZONE
 ══════════════════════════════════════ */
 const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const tzShort = (() => {
@@ -223,181 +205,107 @@ return new Intl.DateTimeFormat('en', {timeZoneName:'short', timeZone:userTZ})
 })();
 document.getElementById('tzBadge').textContent = '🌐 ' + tzShort;
 
-/* Get local YYYY-MM-DD for any Date object */
 function localDateStr(d) {
 const y = d.getFullYear();
 const mo = String(d.getMonth()+1).padStart(2,'0');
 const da = String(d.getDate()).padStart(2,'0');
 return `${y}-${mo}-${da}`;
 }
-
-/* Convert UTC ISO string → local HH:MM */
-function localTime(utcStr) {
-return new Date(utcStr).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
-}
-
-/* Convert UTC ISO string → local YYYY-MM-DD
-This is the KEY fix: a match at 22:00 UTC on Mon might be Tue 01:00 in some TZs,
-or it might still be Mon 22:00 — we let the browser decide. */
-function matchLocalDate(utcStr) {
-return localDateStr(new Date(utcStr));
+function localTime(isoStr) {
+return new Date(isoStr).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
 }
 
 /* ══════════════════════════════════════
-API
+API — API-Football (api-sports.io) via our own server proxy
 ══════════════════════════════════════ */
 const isLocal = location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:';
-const PROXY = '/api/matches';
-const LMETA = {
-PL: {flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',country:'England', z:{ucl:4,uel:2,rel:3}},
-PD: {flag:'🇪🇸', country:'Spain', z:{ucl:4,uel:2,rel:3}},
-BL1:{flag:'🇩🇪', country:'Germany', z:{ucl:4,uel:2,rel:2}},
-SA: {flag:'🇮🇹', country:'Italy', z:{ucl:4,uel:2,rel:3}},
-FL1:{flag:'🇫🇷', country:'France', z:{ucl:3,uel:2,rel:3}},
-CL: {flag:'🇪🇺', country:'UEFA', z:null},
-EL: {flag:'🟠', country:'UEFA', z:null},
-EC: {flag:'🏆', country:'Europe', z:null},
-PPL:{flag:'🇵🇹', country:'Portugal', z:{ucl:3,uel:2,rel:3}},
-DED:{flag:'🇳🇱', country:'Netherlands',z:{ucl:2,uel:2,rel:3}},
-WC: {flag:'🌍', country:'World', z:null},
-BSA:{flag:'🇧🇷', country:'Brazil', z:{ucl:0,uel:0,rel:4}},
+const PROXY = '/api/football';
+// Only used when testing from a local file — never commit a real key here.
+// In production the key lives server-side as the APIFOOTBALL_KEY env var.
+const LOCAL_DEV_KEY = 'YOUR_API_FOOTBALL_KEY_FOR_LOCAL_TESTING_ONLY';
+
+async function apiFetch(path, params = {}) {
+const qs = new URLSearchParams(params).toString();
+const url = isLocal
+? `https://v3.football.api-sports.io/${path}${qs ? '?'+qs : ''}`
+: `${PROXY}?path=${encodeURIComponent(path)}${qs ? '&'+qs : ''}`;
+const headers = isLocal ? {'x-apisports-key': LOCAL_DEV_KEY} : {};
+const r = await fetch(url, {headers});
+if (!r.ok) { const t = await r.text().catch(()=>''); throw new Error(`HTTP ${r.status}: ${t.slice(0,150)}`); }
+const data = await r.json();
+if (data.errors && Array.isArray(data.errors) ? data.errors.length : Object.keys(data.errors||{}).length) {
+throw new Error(typeof data.errors==='string' ? data.errors : JSON.stringify(data.errors));
+}
+return data;
+}
+
+/* Curated leagues shown in the sidebar. "season" is the year API-Football
+expects: domestic European leagues use the start year of the Aug→May
+season; international tournaments (World Cup, Euros) use the year itself. */
+const now = new Date();
+const SEASON_DOM = (now.getMonth()+1) >= 7 ? now.getFullYear() : now.getFullYear()-1;
+const THIS_YEAR = now.getFullYear();
+const LEAGUES = {
+39: {flag:'🏴', country:'England', name:'Premier League', season:SEASON_DOM},
+140:{flag:'🇪🇸', country:'Spain', name:'La Liga', season:SEASON_DOM},
+78: {flag:'🇩🇪', country:'Germany', name:'Bundesliga', season:SEASON_DOM},
+135:{flag:'🇮🇹', country:'Italy', name:'Serie A', season:SEASON_DOM},
+61: {flag:'🇫🇷', country:'France', name:'Ligue 1', season:SEASON_DOM},
+2:  {flag:'🇪🇺', country:'UEFA', name:'Champions League', season:SEASON_DOM},
+3:  {flag:'🟠', country:'UEFA', name:'Europa League', season:SEASON_DOM},
+94: {flag:'🇵🇹', country:'Portugal', name:'Primeira Liga', season:SEASON_DOM},
+88: {flag:'🇳🇱', country:'Netherlands', name:'Eredivisie', season:SEASON_DOM},
+1:  {flag:'🌍', country:'World', name:'World Cup', season:THIS_YEAR},
+4:  {flag:'🏆', country:'Europe', name:'Euro Championship', season:THIS_YEAR},
+71: {flag:'🇧🇷', country:'Brazil', name:'Brasileirão', season:THIS_YEAR},
 };
+
+function buildLeagueSidebar() {
+const box = document.getElementById('leagueSidebar');
+box.innerHTML = Object.entries(LEAGUES).map(([id,L]) => `
+<div class="ls-row">
+<span>${L.flag}</span>
+<span class="ls-name" onclick="setSidebar('${id}',this.closest('.ls-row'))">${L.name}</span>
+<button class="ls-btn" onclick="triggerStandings(${id},this)">Table</button>
+</div>`).join('');
+}
+
 let allMatches=[], chipFilter='all', sideFilter='all', searchTerm='', activeDate='', activeStBtn=null;
 
-async function apiFetch(path) {
-const clean = path.replace(/^\/+/,'');
-const url = isLocal
-? `https://api.football-data.org/v4/${clean}`
-: `${PROXY}?path=${encodeURIComponent(clean)}`;
-const headers = isLocal ? {'X-Auth-Token':'8684c9e13ec4428db00d63b95adc2cf4'} : {};
-const r = await fetch(url, {headers});
-if (!r.ok) { const t=await r.text().catch(()=>''); throw new Error(`HTTP ${r.status}: ${t.slice(0,120)}`); }
-return r.json();
-}
-
 /* ══════════════════════════════════════
-LIVE MINUTE — estimated client-side
-football-data.org's free plan does not return a live "minute" field,
-so we approximate elapsed time from kickoff (1st half) and from the
-first moment we observe the match resume after HT (2nd half).
-State persists across polls in matchClocks, keyed by match id.
+LIVE STATUS — these come straight from API-Football, which sources
+the real broadcast clock (including stoppage/extra time) from the
+match officials' feed — no client-side guessing.
 ══════════════════════════════════════ */
-const matchClocks = {};
+const LIVE_CODES = ['1H','2H','ET','P','BT','SUSP','INT','LIVE'];
+const FINISHED_CODES = ['FT','AET','PEN','AWD','WO'];
+const UPCOMING_CODES = ['NS','TBD'];
+const POSTPONED_CODES = ['PST','CANC','ABD'];
 
-function estimateMinute(m) {
-const id = m.id;
-const now = Date.now();
-if (!matchClocks[id]) matchClocks[id] = { wasHT:false, secondHalfStart:null };
-const c = matchClocks[id];
-
-if (m.status === 'PAUSED') {
-c.wasHT = true;
-return null; // shown as "HT" badge instead
-}
-if (m.status !== 'IN_PLAY') return null;
-
-if (c.wasHT) {
-if (!c.secondHalfStart) c.secondHalfStart = now;
-const mins = 45 + Math.floor((now - c.secondHalfStart) / 60000);
-return Math.min(mins, 90);
-} else {
-const kickoff = new Date(m.utcDate).getTime();
-const mins = Math.floor((now - kickoff) / 60000);
-return Math.max(1, Math.min(mins, 45));
-}
-}
-
-function minuteLabel(mins, status) {
-if (status === 'PAUSED') return 'HT';
-if (mins == null) return '●';
-if (mins >= 45 && mins < 46) return "45+'";
-if (mins >= 90) return "90+'";
-return mins + "'";
+function minuteLabel(fx) {
+const s = fx.fixture.status.short;
+const el = fx.fixture.status.elapsed;
+if (s==='HT') return 'HT';
+if (s==='BT') return 'Break';
+if (s==='SUSP') return 'Suspended';
+if (s==='INT') return 'Interrupted';
+if (s==='P') return 'Pens';
+if (LIVE_CODES.includes(s)) return el!=null ? el+"'" : '●';
+return '';
 }
 
 /* ══════════════════════════════════════
-GOAL SCORERS — fetched on demand (Stats button)
-football-data.org only includes the "goals" array with scorer +
-minute on the single-match endpoint, not the bulk list, so we only
-call it when the user actually asks to see it (avoids rate limits).
-══════════════════════════════════════ */
-const scorersCache = {};
-
-async function toggleScorers(matchId, btn) {
-const row = document.getElementById('scorers-' + matchId);
-if (!row) return;
-
-if (!row.classList.contains('hidden')) {
-row.classList.add('hidden');
-return;
-}
-row.classList.remove('hidden');
-
-if (scorersCache[matchId]) {
-row.innerHTML = scorersCache[matchId];
-return;
-}
-
-row.innerHTML = '<span class="scorers-loading">Loading goal scorers…</span>';
-try {
-const data = await apiFetch(`matches/${matchId}`);
-const goals = data.goals || [];
-let html;
-if (!goals.length) {
-html = '<span class="scorers-loading">No goals yet.</span>';
-} else {
-html = goals.map(g => {
-const side = g.team && data.homeTeam && g.team.id === data.homeTeam.id ? '🏠' : '🚩';
-const scorer = g.scorer?.name || 'Unknown';
-const assist = g.assist?.name ? ` (assist: ${g.assist.name})` : '';
-const min = g.minute != null ? g.minute + (g.injuryTime ? '+' + g.injuryTime : '') + "'" : '';
-return `<div class="goal-line"><span class="gl-min">${min}</span><span class="gl-side">${side}</span><span>⚽ ${scorer}${assist}</span></div>`;
-}).join('');
-}
-scorersCache[matchId] = html;
-row.innerHTML = html;
-} catch (e) {
-row.innerHTML = `<span class="scorers-loading">Scorers unavailable (${e.message})</span>`;
-}
-}
-
-/* ══════════════════════════════════════
-LOAD MATCHES
-The API takes a UTC date. Because a match at e.g. 23:00 UTC on day X
-appears as day X+1 locally in +1 and beyond, we fetch TWO dates:
-yesterday-UTC and today-UTC relative to the selected local date,
-then filter client-side by local date.
+LOAD MATCHES — one call per date covers every league worldwide,
+filtered client-side to the leagues we track.
 ══════════════════════════════════════ */
 async function loadMatches(localDateString) {
 activeDate = localDateString;
 document.getElementById('matchesContainer').innerHTML =
 '<div class="loading-state"><div class="spinner"></div><p>Fetching scores…</p></div>';
 try {
-// Parse the local date
-const [y,m,d] = localDateString.split('-').map(Number);
-const localMidnight = new Date(y, m-1, d); // midnight local
-
-// UTC dates we need to cover this local day
-const tzOffsetMs = localMidnight.getTimezoneOffset() * 60000;
-const utcStart = new Date(localMidnight.getTime() + tzOffsetMs);
-const utcEnd = new Date(utcStart.getTime() + 24*3600*1000);
-
-const utcDate1 = localDateStr(utcStart);
-const utcDate2 = localDateStr(utcEnd);
-
-let matches = [];
-if (utcDate1 === utcDate2) {
-const data = await apiFetch(`matches?date=${utcDate1}`);
-matches = data.matches || [];
-} else {
-const [d1, d2] = await Promise.all([
-apiFetch(`matches?date=${utcDate1}`).catch(()=>({matches:[]})),
-apiFetch(`matches?date=${utcDate2}`).catch(()=>({matches:[]})),
-]);
-matches = [...(d1.matches||[]), ...(d2.matches||[])];
-}
-
-allMatches = matches.filter(m => matchLocalDate(m.utcDate) === localDateString);
+const data = await apiFetch('fixtures', { date: localDateString, timezone: userTZ });
+const all = data.response || [];
+allMatches = all.filter(fx => LEAGUES[fx.league.id]);
 
 render(); updateTicker(); updateCounters(); renderFeatured();
 const t = new Date();
@@ -406,14 +314,15 @@ document.getElementById('lastUpdated').textContent =
 } catch(e) {
 document.getElementById('lastUpdated').textContent = 'Error';
 document.getElementById('matchesContainer').innerHTML =
-`<div class="err-box"><div class="ei">⚠️</div><p><strong>Could not load scores</strong><br><br>${isLocal?'Open on Vercel for live data.':'Error: '+e.message}</p></div>`;
+`<div class="err-box"><div class="ei">⚠️</div><p><strong>Could not load scores</strong><br><br>Error: ${e.message}</p></div>`;
 }
 }
 
 /* ══════════════════════════════════════
 STANDINGS
 ══════════════════════════════════════ */
-async function triggerStandings(code, name, flag, btn) {
+async function triggerStandings(leagueId, btn) {
+const L = LEAGUES[leagueId];
 const slot = document.getElementById('standingsSlot');
 if (activeStBtn === btn) {
 btn.classList.remove('on');
@@ -427,20 +336,20 @@ activeStBtn = btn;
 slot.innerHTML = `
 <div class="st-panel">
 <div class="stp-head">
-<span class="stp-flag">${flag}</span>
-<span class="stp-title">${name}</span>
+<span class="stp-flag">${L.flag}</span>
+<span class="stp-title">${L.name}</span>
 <span class="stp-close" onclick="closeStandings()">✕</span>
 </div>
 <div class="stp-loading"><div class="stp-spinner"></div>Loading standings…</div>
 </div>`;
 setTimeout(()=>document.getElementById('rightPanel').scrollTo({top:220,behavior:'smooth'}),100);
 try {
-const data = await apiFetch(`competitions/${code}/standings`);
-buildStandingsHTML(data, code, name, flag, slot);
+const data = await apiFetch('standings', { league: leagueId, season: L.season });
+buildStandingsHTML(data, L, slot);
 } catch(e) {
 slot.innerHTML = `
 <div class="st-panel">
-<div class="stp-head"><span class="stp-flag">${flag}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="stp-head"><span class="stp-flag">${L.flag}</span><span class="stp-title">${L.name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
 <div class="no-st">⚠️ Standings unavailable<br><small style="color:var(--muted)">${e.message}</small></div>
 </div>`;
 }
@@ -452,20 +361,37 @@ document.getElementById('standingsSlot').innerHTML =
 '<div class="st-hint">👆 Click <strong>Table</strong> or <strong>Groups</strong><br>next to any league to see<br>live standings here</div>';
 }
 
-function buildStandingsHTML(data, code, name, flag, slot) {
-const standings = data.standings || [];
-const meta = LMETA[code] || {};
-const totalGroups = standings.filter(s => s.type === 'TOTAL');
+function zoneClass(description) {
+if (!description) return '';
+const d = description.toLowerCase();
+if (d.includes('champions league')) return 'z-ucl';
+if (d.includes('europa') || d.includes('conference')) return 'z-uel';
+if (d.includes('relegation')) return 'z-rel';
+return '';
+}
 
-if (totalGroups.length > 1) {
-const groupsHTML = totalGroups.map(g => {
-const label = (g.group || '').replace('GROUP_','Group ').replace(/_/g,' ') || 'Group';
-const rows = (g.table || []).map(r => `
-<tr>
-<td>${r.position}</td>
-<td><img src="${r.team.crest||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.shortName||r.team.name}</td>
-<td>${r.playedGames}</td><td>${r.won}</td><td>${r.draw}</td><td>${r.lost}</td>
-<td>${r.goalDifference>=0?'+':''}${r.goalDifference}</td>
+function buildStandingsHTML(data, L, slot) {
+const leagueObj = data.response?.[0]?.league;
+const groups = leagueObj?.standings || [];
+
+if (!groups.length) {
+slot.innerHTML = `
+<div class="st-panel">
+<div class="stp-head"><span class="stp-flag">${L.flag}</span><span class="stp-title">${L.name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="no-st">No standings available yet for this season.</div>
+</div>`;
+return;
+}
+
+if (groups.length > 1) {
+const groupsHTML = groups.map((g, i) => {
+const label = g[0]?.group || `Group ${i+1}`;
+const rows = g.map(r => `
+<tr class="${zoneClass(r.description)}">
+<td>${r.rank}</td>
+<td><img src="${r.team.logo||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.name}</td>
+<td>${r.all.played}</td><td>${r.all.win}</td><td>${r.all.draw}</td><td>${r.all.lose}</td>
+<td>${r.goalsDiff>=0?'+':''}${r.goalsDiff}</td>
 <td class="pts">${r.points}</td>
 </tr>`).join('');
 return `<div class="wc-group">
@@ -478,99 +404,92 @@ return `<div class="wc-group">
 }).join('');
 slot.innerHTML = `
 <div class="st-panel">
-<div class="stp-head"><span class="stp-flag">${flag}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="stp-head"><span class="stp-flag">${L.flag}</span><span class="stp-title">${L.name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
 ${groupsHTML}
 </div>`;
 return;
 }
 
-const table = totalGroups[0]?.table || standings[0]?.table || [];
-const z = meta.z;
-const zClass = (pos, tot) => {
-if (!z) return '';
-if (pos <= z.ucl) return 'z-ucl';
-if (pos <= z.ucl + z.uel) return 'z-uel';
-if (tot - pos < z.rel) return 'z-rel';
-return '';
-};
+const table = groups[0] || [];
 const rows = table.map(r => `
-<tr class="${zClass(r.position, table.length)}">
-<td>${r.position}</td>
-<td><img src="${r.team.crest||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.shortName||r.team.name}</td>
-<td>${r.playedGames}</td><td>${r.won}</td><td>${r.draw}</td><td>${r.lost}</td>
-<td>${r.goalDifference>=0?'+':''}${r.goalDifference}</td>
+<tr class="${zoneClass(r.description)}">
+<td>${r.rank}</td>
+<td><img src="${r.team.logo||''}" style="width:13px;height:13px;vertical-align:middle;margin-right:4px;object-fit:contain" onerror="this.style.display='none'">${r.team.name}</td>
+<td>${r.all.played}</td><td>${r.all.win}</td><td>${r.all.draw}</td><td>${r.all.lose}</td>
+<td>${r.goalsDiff>=0?'+':''}${r.goalsDiff}</td>
 <td class="pts">${r.points}</td>
 </tr>`).join('');
-const legend = z ? `
-<div class="stp-legend">
-${z.ucl ? `<div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>UCL</div>` : ''}
-${z.uel ? `<div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>UEL</div>` : ''}
-${z.rel ? `<div class="leg-item"><div class="leg-dot" style="background:var(--live)"></div>Relegation</div>` : ''}
-</div>` : '';
 slot.innerHTML = `
 <div class="st-panel">
-<div class="stp-head"><span class="stp-flag">${flag}</span><span class="stp-title">${name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
+<div class="stp-head"><span class="stp-flag">${L.flag}</span><span class="stp-title">${L.name}</span><span class="stp-close" onclick="closeStandings()">✕</span></div>
 <table class="stp-table">
 <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead>
 <tbody>${rows}</tbody>
 </table>
-${legend}
+<div class="stp-legend">
+<div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>UCL</div>
+<div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>UEL/Conf.</div>
+<div class="leg-item"><div class="leg-dot" style="background:var(--live)"></div>Relegation</div>
+</div>
 </div>`;
+}
+
+/* ══════════════════════════════════════
+NAVIGATE TO MATCH PAGE
+══════════════════════════════════════ */
+function goToMatch(fixtureId) {
+window.location.href = `match.html?id=${fixtureId}&tz=${encodeURIComponent(userTZ)}`;
 }
 
 /* ══════════════════════════════════════
 FEATURED MATCH
 ══════════════════════════════════════ */
 function renderFeatured() {
-const live = allMatches.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED');
-const m = live[0] || allMatches.find(m=>m.status==='FINISHED') || allMatches[0];
+const live = allMatches.filter(fx=>LIVE_CODES.includes(fx.fixture.status.short));
+const fx = live[0] || allMatches.find(fx=>FINISHED_CODES.includes(fx.fixture.status.short)) || allMatches[0];
 const el = document.getElementById('featContent');
-if (!m) { el.innerHTML='<p style="text-align:center;color:var(--muted);padding:10px;font-size:12px">No matches today</p>'; return; }
-const hs = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? '–';
-const as = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? '–';
-const isLive = m.status==='IN_PLAY';
-const mins = isLive ? estimateMinute(m) : null;
+const card = document.getElementById('featCard');
+if (!fx) { el.innerHTML='<p style="text-align:center;color:var(--muted);padding:10px;font-size:12px">No matches today</p>'; card.onclick=null; return; }
+const isLive = LIVE_CODES.includes(fx.fixture.status.short);
+card.onclick = () => goToMatch(fx.fixture.id);
 el.innerHTML = `
 <div class="feat-teams">
 <div class="feat-team">
-<img src="${m.homeTeam.crest||''}" class="feat-logo" onerror="this.style.display='none'">
-<div class="feat-name">${m.homeTeam.shortName||m.homeTeam.name}</div>
+<img src="${fx.teams.home.logo||''}" class="feat-logo" onerror="this.style.display='none'">
+<div class="feat-name">${fx.teams.home.name}</div>
 </div>
-<div class="feat-score">${hs}&nbsp;–&nbsp;${as}</div>
+<div class="feat-score">${fx.goals.home ?? '–'}&nbsp;–&nbsp;${fx.goals.away ?? '–'}</div>
 <div class="feat-team">
-<img src="${m.awayTeam.crest||''}" class="feat-logo" onerror="this.style.display='none'">
-<div class="feat-name">${m.awayTeam.shortName||m.awayTeam.name}</div>
+<img src="${fx.teams.away.logo||''}" class="feat-logo" onerror="this.style.display='none'">
+<div class="feat-name">${fx.teams.away.name}</div>
 </div>
 </div>
-<div class="feat-meta">${isLive?`<span class="feat-live-dot">● LIVE ${minuteLabel(mins, m.status)}</span> &nbsp;`:''}${m.competition.name}</div>`;
+<div class="feat-meta">${isLive?`<span class="feat-live-dot">● LIVE ${minuteLabel(fx)}</span> &nbsp;`:''}${fx.league.name}</div>`;
 }
 
 /* ══════════════════════════════════════
 MATCH ROW HELPERS
 ══════════════════════════════════════ */
-function statusHTML(m) {
-const s = m.status;
-if (s==='IN_PLAY') {
-const mins = estimateMinute(m);
-return `<div class="st live">LIVE</div><span class="min">${minuteLabel(mins, s)}</span>`;
-}
-if (s==='PAUSED') return `<div class="st ht">HT</div>`;
-if (s==='FINISHED') return `<div class="st ft">FT</div>`;
-if (s==='POSTPONED')return `<div class="st pp">PP</div>`;
-return `<div class="st ns">${localTime(m.utcDate)}</div><span class="tz-label">${tzShort}</span>`;
+function statusHTML(fx) {
+const s = fx.fixture.status.short;
+if (LIVE_CODES.includes(s)) return `<div class="st live">LIVE</div><span class="min">${minuteLabel(fx)}</span>`;
+if (s==='HT') return `<div class="st ht">HT</div>`;
+if (FINISHED_CODES.includes(s)) return `<div class="st ft">${s==='AET'?'AET':s==='PEN'?'PEN':'FT'}</div>`;
+if (POSTPONED_CODES.includes(s)) return `<div class="st pp">${s==='CANC'?'CANC':'PP'}</div>`;
+return `<div class="st ns">${localTime(fx.fixture.date)}</div><span class="tz-label">${tzShort}</span>`;
 }
 
-function scoreHTML(m) {
-if (m.status==='TIMED'||m.status==='SCHEDULED')
-return `<div class="score-box"><span class="dash">vs</span></div>`;
-const hs = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? 0;
-const as = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? 0;
+function scoreHTML(fx) {
+const s = fx.fixture.status.short;
+if (UPCOMING_CODES.includes(s)) return `<div class="score-box"><span class="dash">vs</span></div>`;
+const hs = fx.goals.home ?? 0;
+const as = fx.goals.away ?? 0;
 return `<div class="score-box"><span class="sc ${hs>as?'w':''}">${hs}</span><span class="dash">–</span><span class="sc ${as>hs?'w':''}">${as}</span></div>`;
 }
 
 function logoHTML(team) {
-return team.crest
-? `<img src="${team.crest}" class="t-logo" onerror="this.outerHTML='<div class=t-ph>⚽</div>'">`
+return team.logo
+? `<img src="${team.logo}" class="t-logo" onerror="this.outerHTML='<div class=t-ph>⚽</div>'">`
 : `<div class="t-ph">⚽</div>`;
 }
 
@@ -581,23 +500,23 @@ function render() {
 let list = [...allMatches];
 if (searchTerm) {
 const q = searchTerm.toLowerCase();
-list = list.filter(m =>
-m.homeTeam.name.toLowerCase().includes(q) ||
-m.awayTeam.name.toLowerCase().includes(q) ||
-m.competition.name.toLowerCase().includes(q));
+list = list.filter(fx =>
+fx.teams.home.name.toLowerCase().includes(q) ||
+fx.teams.away.name.toLowerCase().includes(q) ||
+fx.league.name.toLowerCase().includes(q));
 }
 const sf = chipFilter !== 'all' ? chipFilter
 : sideFilter==='live' ? 'live'
 : sideFilter==='finished' ? 'finished'
 : sideFilter==='upcoming' ? 'upcoming' : 'all';
 
-if (sf==='live') list = list.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED');
-if (sf==='finished') list = list.filter(m=>m.status==='FINISHED');
-if (sf==='upcoming') list = list.filter(m=>m.status==='TIMED'||m.status==='SCHEDULED');
+if (sf==='live') list = list.filter(fx=>LIVE_CODES.includes(fx.fixture.status.short)||fx.fixture.status.short==='HT');
+if (sf==='finished') list = list.filter(fx=>FINISHED_CODES.includes(fx.fixture.status.short));
+if (sf==='upcoming') list = list.filter(fx=>UPCOMING_CODES.includes(fx.fixture.status.short));
 if (!['all','live','finished','upcoming'].includes(sideFilter))
-list = list.filter(m=>m.competition.code===sideFilter);
+list = list.filter(fx=>String(fx.league.id)===String(sideFilter));
 
-list.sort((a,b)=>new Date(a.utcDate)-new Date(b.utcDate));
+list.sort((a,b)=>new Date(a.fixture.date)-new Date(b.fixture.date));
 
 const container = document.getElementById('matchesContainer');
 if (!list.length) {
@@ -606,36 +525,34 @@ return;
 }
 
 const groups = {};
-list.forEach(m => {
-const k = m.competition.id;
-if (!groups[k]) groups[k] = {info:m.competition, matches:[]};
-groups[k].matches.push(m);
+list.forEach(fx => {
+const k = fx.league.id;
+if (!groups[k]) groups[k] = {info:fx.league, matches:[]};
+groups[k].matches.push(fx);
 });
 
 container.innerHTML = Object.values(groups).map(g => {
-const meta = LMETA[g.info.code] || {};
-const code = g.info.code || '';
+const meta = LEAGUES[g.info.id] || {flag:'🏆', country:g.info.country};
 return `<div class="league-block">
 <div class="league-header">
-<span class="lh-flag" onclick="this.closest('.league-block').classList.toggle('collapsed')">${meta.flag||'🏆'}</span>
+<span class="lh-flag" onclick="this.closest('.league-block').classList.toggle('collapsed')">${meta.flag}</span>
 <div class="lh-info" onclick="this.closest('.league-block').classList.toggle('collapsed')">
 <div class="lh-name">${g.info.name}</div>
-<div class="lh-country">${meta.country||g.info.area?.name||''}</div>
+<div class="lh-country">${meta.country||''}</div>
 </div>
 <span class="lh-count">${g.matches.length} match${g.matches.length>1?'es':''}</span>
-<button class="lh-st-btn" onclick="triggerStandings('${code}','${g.info.name}','${meta.flag||'🏆'}',this)">📊 Table</button>
+<button class="lh-st-btn" onclick="triggerStandings(${g.info.id},this)">📊 Table</button>
 <span class="lh-chev" onclick="this.closest('.league-block').classList.toggle('collapsed')">▼</span>
 </div>
 <div class="league-matches">
-${g.matches.map(m=>`
-<div class="match-row">
-<div class="match-time">${statusHTML(m)}</div>
-<div class="team home">${logoHTML(m.homeTeam)}<span>${m.homeTeam.shortName||m.homeTeam.name}</span></div>
-${scoreHTML(m)}
-<div class="team away"><span>${m.awayTeam.shortName||m.awayTeam.name}</span>${logoHTML(m.awayTeam)}</div>
-<div class="match-acts"><button class="act-btn" onclick="event.stopPropagation();toggleScorers(${m.id},this)">⚽ Scorers</button></div>
-</div>
-<div class="scorers-row hidden" id="scorers-${m.id}"></div>`).join('')}
+${g.matches.map(fx=>`
+<div class="match-row" onclick="goToMatch(${fx.fixture.id})">
+<div class="match-time">${statusHTML(fx)}</div>
+<div class="team home">${logoHTML(fx.teams.home)}<span>${fx.teams.home.name}</span></div>
+${scoreHTML(fx)}
+<div class="team away"><span>${fx.teams.away.name}</span>${logoHTML(fx.teams.away)}</div>
+<div class="row-arrow">›</div>
+</div>`).join('')}
 </div>
 </div>`;
 }).join('');
@@ -645,38 +562,35 @@ ${scoreHTML(m)}
 TICKER & COUNTERS
 ══════════════════════════════════════ */
 function updateTicker() {
-const live = allMatches.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED');
+const live = allMatches.filter(fx=>LIVE_CODES.includes(fx.fixture.status.short)||fx.fixture.status.short==='HT');
 if (!live.length) {
 document.getElementById('ticker').innerHTML = '<span class="tick-item">No live matches right now ⚽</span>';
 return;
 }
-const items = live.map(m => {
-const hs = m.score?.fullTime?.home??m.score?.halfTime?.home??0;
-const as = m.score?.fullTime?.away??m.score?.halfTime?.away??0;
-const mins = m.status==='IN_PLAY' ? estimateMinute(m) : null;
-const minTxt = m.status==='IN_PLAY' ? ` ${minuteLabel(mins, m.status)}` : ' HT';
-return `<span class="tick-item"><span class="tick-dot"></span><strong>${m.homeTeam.shortName||m.homeTeam.name}</strong> ${hs}–${as} <strong>${m.awayTeam.shortName||m.awayTeam.name}</strong>${minTxt}</span>`;
+const items = live.map(fx => {
+const hs = fx.goals.home ?? 0, as = fx.goals.away ?? 0;
+return `<span class="tick-item"><span class="tick-dot"></span><strong>${fx.teams.home.name}</strong> ${hs}–${as} <strong>${fx.teams.away.name}</strong> ${minuteLabel(fx)}</span>`;
 });
 document.getElementById('ticker').innerHTML = [...items,...items].join('');
 }
 
 function updateCounters() {
-const n = allMatches.filter(m=>m.status==='IN_PLAY'||m.status==='PAUSED').length;
+const n = allMatches.filter(fx=>LIVE_CODES.includes(fx.fixture.status.short)||fx.fixture.status.short==='HT').length;
 document.getElementById('liveBadge').textContent = n+' Live';
-document.getElementById('sc-all').textContent = n;
+document.getElementById('sc-all').textContent = allMatches.length;
 document.getElementById('sc-live').textContent = n;
 }
 
 /* ══════════════════════════════════════
-DATE STRIP — built in LOCAL dates
+DATE STRIP
 ══════════════════════════════════════ */
 function buildDateStrip() {
 const strip = document.getElementById('dateStrip');
 const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 strip.innerHTML = '';
-const now = new Date();
+const today = new Date();
 for (let i = -3; i <= 4; i++) {
-const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
 const ds = localDateStr(d);
 const pill = document.createElement('div');
 pill.className = 'date-pill' + (i===0?' active':'');
@@ -706,12 +620,12 @@ render();
 }
 document.getElementById('searchInput').addEventListener('input', e=>{searchTerm=e.target.value.trim();render();});
 
-/* Auto-refresh every 60s (also keeps live minutes ticking) */
+/* Refresh from the API every 60s — this re-pulls the real elapsed/extra-time
+clock from API-Football rather than estimating it client-side. */
 setInterval(()=>loadMatches(activeDate), 60000);
-/* Re-render every 15s so the live minute counts up smoothly between full reloads */
-setInterval(()=>{ if (allMatches.some(m=>m.status==='IN_PLAY')) { render(); renderFeatured(); updateTicker(); } }, 15000);
 
 /* ── INIT ── */
+buildLeagueSidebar();
 buildDateStrip();
 loadMatches(activeDate);
 </script>
