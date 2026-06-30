@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Match Center – GoalPulse</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d0f14;--surface:#161a24;--card:#1c2132;--border:#252d42;--live:#e8303a;--accent:#00c2ff;--green:#00e676;--muted:#6b7592;--text:#e4e8f4;--sub:#9ca3be;--radius:10px;--fd:'Barlow Condensed',sans-serif;--fb:'Inter',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.5;min-height:100vh}
+a{color:inherit;text-decoration:none}button{cursor:pointer;border:none;background:none;font-family:inherit}
+header{position:sticky;top:0;z-index:200;background:rgba(13,15,20,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:12px;height:54px}
+.logo{font-family:var(--fd);font-size:26px;font-weight:800;white-space:nowrap}.logo span{color:var(--accent)}
+.back-btn{font-size:13px;color:var(--sub);padding:6px 12px;border:1px solid var(--border);border-radius:20px;transition:all .15s}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+main{max-width:680px;margin:0 auto;padding:20px 16px}
+.loading-state{text-align:center;padding:80px 20px;color:var(--muted)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{text-align:center;padding:40px 18px;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1px solid var(--border)}
+.err-box .ei{font-size:34px;margin-bottom:8px}
+.score-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:22px 16px;margin-bottom:18px;position:relative;overflow:hidden}
+.score-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(0,194,255,.12),transparent 60%);pointer-events:none}
+.league-line{text-align:center;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:16px;letter-spacing:.3px}
+.score-teams{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.score-team{text-align:center;flex:1;min-width:0}
+.score-logo{width:52px;height:52px;object-fit:contain;margin:0 auto 8px;display:block}
+.score-team-name{font-family:var(--fd);font-size:16px;font-weight:700;line-height:1.2}
+.score-mid{text-align:center;flex-shrink:0;padding:0 8px}
+.score-num{font-family:var(--fd);font-size:44px;font-weight:800;line-height:1}
+.score-status{margin-top:8px;font-size:12px;font-weight:700;color:var(--live)}
+.score-status.notlive{color:var(--muted)}
+.score-meta{text-align:center;margin-top:16px;font-size:11px;color:var(--muted)}
+.section{margin-bottom:18px}
+.section-title{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.timeline{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.tl-row{display:grid;grid-template-columns:38px 1fr 22px 1fr;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--border);font-size:12.5px}
+.tl-row:last-child{border-bottom:none}
+.tl-min{font-weight:700;color:var(--accent);text-align:right}
+.tl-icon{text-align:center;font-size:14px}
+.tl-home{text-align:right}
+.tl-away{text-align:left}
+.tl-side{display:flex;flex-direction:column;gap:1px}
+.tl-side.empty{visibility:hidden}
+.tl-player{font-weight:600}
+.tl-detail{color:var(--muted);font-size:11px}
+.no-events{padding:18px;text-align:center;color:var(--muted);font-size:12.5px}
+footer{border-top:1px solid var(--border);padding:16px;text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">Goal<span>Pulse</span></div>
+<a class="back-btn" href="index.html">← Back to scores</a>
+</header>
+<main id="main"><div class="loading-state"><div class="spinner"></div><p>Loading match…</p></div></main>
+<footer><p>© 2026 GoalPulse · Data: <a href="https://www.api-football.com" target="_blank">API-Football</a></p></footer>
+<script>
+const params = new URLSearchParams(location.search);
+const fixtureId = params.get('id');
+const userTZ = params.get('tz') || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+const isLocal = location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:';
+const PROXY = '/api/football';
+const LOCAL_DEV_KEY = 'YOUR_API_FOOTBALL_KEY_FOR_LOCAL_TESTING_ONLY';
+
+async function apiFetch(path, params = {}) {
+const qs = new URLSearchParams(params).toString();
+const url = isLocal
+? `https://v3.football.api-sports.io/${path}${qs ? '?'+qs : ''}`
+: `${PROXY}?path=${encodeURIComponent(path)}${qs ? '&'+qs : ''}`;
+const headers = isLocal ? {'x-apisports-key': LOCAL_DEV_KEY} : {};
+const r = await fetch(url, {headers});
+if (!r.ok) { const t = await r.text().catch(()=>''); throw new Error(`HTTP ${r.status}: ${t.slice(0,150)}`); }
+return r.json();
+}
+
+const LIVE_CODES = ['1H','2H','ET','P','BT','SUSP','INT','LIVE'];
+const FINISHED_CODES = ['FT','AET','PEN','AWD','WO'];
+
+function minuteLabel(fx) {
+const s = fx.fixture.status.short;
+const el = fx.fixture.status.elapsed;
+if (s==='HT') return 'Half-time';
+if (s==='BT') return 'Break';
+if (s==='SUSP') return 'Suspended';
+if (s==='INT') return 'Interrupted';
+if (s==='P') return 'Penalties';
+if (FINISHED_CODES.includes(s)) return s==='AET'?'Full-time (AET)':s==='PEN'?'Full-time (Pens)':'Full-time';
+if (LIVE_CODES.includes(s)) return (el!=null ? el+"'" : 'Live') + ' · Live';
+return new Date(fx.fixture.date).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'});
+}
+
+function eventIcon(ev) {
+if (ev.type === 'Goal') {
+if (ev.detail === 'Own Goal') return '⚽🔴';
+if (ev.detail && ev.detail.includes('Penalty') && ev.detail.includes('Missed')) return '❌';
+if (ev.detail && ev.detail.includes('Penalty')) return '⚽(P)';
+return '⚽';
+}
+if (ev.type === 'Card') return ev.detail === 'Red Card' ? '🟥' : '🟨';
+if (ev.type === 'subst') return '🔄';
+if (ev.type === 'Var') return '📺';
+return '•';
+}
+
+function eventLine(ev) {
+const min = (ev.time.elapsed ?? '') + (ev.time.extra ? '+' + ev.time.extra : '') + "'";
+let player = `<div class="tl-player">${ev.player?.name || 'Unknown'}</div>`;
+let detail = '';
+if (ev.type === 'Goal') {
+detail = ev.assist?.name ? `Assist: ${ev.assist.name}` : (ev.detail && ev.detail !== 'Normal Goal' ? ev.detail : '');
+} else if (ev.type === 'Card') {
+detail = ev.detail || '';
+} else if (ev.type === 'subst') {
+player = `<div class="tl-player">${ev.assist?.name || ev.player?.name || 'Unknown'} <span style="color:var(--green)">↑</span></div>`;
+detail = `${ev.player?.name || ''} <span style="color:var(--live)">↓</span>`;
+}
+return { min, player, detail };
+}
+
+async function load() {
+const main = document.getElementById('main');
+if (!fixtureId) {
+main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>No match selected.</p></div>`;
+return;
+}
+try {
+const [fxData, evData] = await Promise.all([
+apiFetch('fixtures', { id: fixtureId, timezone: userTZ }),
+apiFetch('fixtures/events', { fixture: fixtureId }),
+]);
+const fx = fxData.response?.[0];
+if (!fx) { main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>Match not found.</p></div>`; return; }
+
+const events = (evData.response || []).slice().sort((a,b) => {
+const am = (a.time.elapsed||0) + (a.time.extra||0)/100;
+const bm = (b.time.elapsed||0) + (b.time.extra||0)/100;
+return am - bm;
+});
+
+const isLive = LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short==='HT';
+const goals = events.filter(e => e.type === 'Goal');
+const cards = events.filter(e => e.type === 'Card');
+const subs = events.filter(e => e.type === 'subst');
+
+function renderGroup(title, icon, evs) {
+if (!evs.length) return '';
+const rows = evs.map(ev => {
+const {min, player, detail} = eventLine(ev);
+const isHome = ev.team.id === fx.teams.home.id;
+return `<div class="tl-row">
+<div class="tl-min">${min}</div>
+<div class="tl-side ${isHome?'':'empty'} tl-home">${isHome?player:''}${isHome&&detail?`<div class="tl-detail">${detail}</div>`:''}</div>
+<div class="tl-icon">${eventIcon(ev)}</div>
+<div class="tl-side ${!isHome?'':'empty'} tl-away">${!isHome?player:''}${!isHome&&detail?`<div class="tl-detail">${detail}</div>`:''}</div>
+</div>`;
+}).join('');
+return `<div class="section">
+<div class="section-title">${icon} ${title}</div>
+<div class="timeline">${rows}</div>
+</div>`;
+}
+
+main.innerHTML = `
+<div class="score-card">
+<div class="league-line">${fx.league.name} ${fx.league.round ? '· ' + fx.league.round : ''}</div>
+<div class="score-teams">
+<div class="score-team">
+<img src="${fx.teams.home.logo||''}" class="score-logo" onerror="this.style.display='none'">
+<div class="score-team-name">${fx.teams.home.name}</div>
+</div>
+<div class="score-mid">
+<div class="score-num">${fx.goals.home ?? '–'} – ${fx.goals.away ?? '–'}</div>
+<div class="score-status ${isLive?'':'notlive'}">${minuteLabel(fx)}</div>
+</div>
+<div class="score-team">
+<img src="${fx.teams.away.logo||''}" class="score-logo" onerror="this.style.display='none'">
+<div class="score-team-name">${fx.teams.away.name}</div>
+</div>
+</div>
+<div class="score-meta">${fx.fixture.venue?.name ? fx.fixture.venue.name + ' · ' : ''}${new Date(fx.fixture.date).toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'})}</div>
+</div>
+
+${renderGroup('Goals', '⚽', goals)}
+${renderGroup('Cards', '🟨', cards)}
+${renderGroup('Substitutions', '🔄', subs)}
+${!events.length ? '<div class="no-events">No match events yet.</div>' : ''}
+`;
+
+if (isLive) setTimeout(load, 20000);
+} catch(e) {
+main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p><strong>Could not load match</strong><br><br>${e.message}</p></div>`;
+}
+}
+
+load();
+</script>
+</body>
+</html>
