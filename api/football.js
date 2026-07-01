@@ -32,37 +32,43 @@
 
 const memoryCache = new Map(); // key -> { data, status, expiresAt }
 
+// ══════════════════════════════════════════════════════════════════
+// TTLs below are tuned to survive a FREE API-Football plan: ~100
+// requests/day total, shared across every endpoint and every user.
+// That is roughly 4 requests/hour if spent evenly — so "near real-time"
+// isn't realistic on this plan. These TTLs are deliberately long
+// (minutes, not seconds) to keep total daily upstream calls low even
+// under real traffic. Loosen them only after upgrading to a paid plan.
+// ══════════════════════════════════════════════════════════════════
 function getCacheTTLSeconds(cleanPath, query) {
   const p = cleanPath.toLowerCase();
 
   // Rarely changes at all
-  if (p === 'leagues' || p === 'teams') return 60 * 60 * 24; // 24h
-  if (p === 'standings') return 60 * 15;                      // 15 min
+  if (p === 'leagues' || p === 'teams') return 60 * 60 * 24 * 7; // 7 days
+  if (p === 'standings') return 60 * 60 * 2;                      // 2 hours
 
-  // Fixture-events / stats / lineups update during live play but are
-  // otherwise static — a moderate cache still kills most duplicate load.
-  if (p === 'fixtures/lineups') return 60 * 5;    // 5 min (confirmed pre-match, rarely changes after)
-  if (p === 'fixtures/statistics') return 45;     // updates during live matches
-  if (p === 'fixtures/events') return 30;         // updates during live matches
-  if (p === 'fixtures/headtohead') return 60 * 60; // past meetings, changes ~never
+  if (p === 'fixtures/lineups') return 60 * 20;     // 20 min — confirmed pre-match, static after
+  if (p === 'fixtures/statistics') return 60 * 10;  // 10 min
+  if (p === 'fixtures/events') return 60 * 5;       // 5 min — the most "live" of these, still capped
+  if (p === 'fixtures/headtohead') return 60 * 60 * 24; // past meetings, changes ~never
 
   if (p === 'fixtures') {
-    // Single fixture by id — could be live, so keep it short.
-    if (query.id) return 30;
+    // Single fixture by id.
+    if (query.id) return 60 * 5; // 5 min
 
     // A team's recent form — only changes once a match finishes.
-    if (query.team && query.last) return 60 * 10;
+    if (query.team && query.last) return 60 * 60; // 1 hour
 
     // A whole day's fixtures — the common case (the live-scores list).
     if (query.date) {
       const today = new Date().toISOString().slice(0, 10);
-      if (query.date < today) return 60 * 60 * 24; // past date: immutable, cache hard
-      if (query.date > today) return 60 * 30;       // future date: rarely changes
-      return 30;                                    // today: could contain live matches
+      if (query.date < today) return 60 * 60 * 24 * 7; // past date: immutable, cache hard
+      if (query.date > today) return 60 * 60 * 6;        // future date: rarely changes
+      return 60 * 10;                                    // today: capped at 10 min even if live
     }
   }
 
-  return 60; // sane default for anything not listed above
+  return 60 * 10; // sane default for anything not listed above
 }
 
 export default async function handler(req, res) {
