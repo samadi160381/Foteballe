@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Match Center – GoalPulse</title>
+<title>Match Center – FoteBalle</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 :root{--bg:#0d0f14;--surface:#161a24;--card:#1c2132;--border:#252d42;--live:#e8303a;--accent:#00c2ff;--green:#00e676;--muted:#6b7592;--text:#e4e8f4;--sub:#9ca3be;--radius:10px;--fd:'Barlow Condensed',sans-serif;--fb:'Inter',sans-serif}
@@ -21,53 +21,50 @@ header{position:sticky;top:0;z-index:200;background:rgba(13,15,20,.96);backdrop-
 .logo{font-family:var(--fd);font-size:26px;font-weight:800;white-space:nowrap}.logo span{color:var(--accent)}
 .back-btn{font-size:13px;color:var(--sub);padding:6px 12px;border:1px solid var(--border);border-radius:20px;transition:all .15s}
 .back-btn:hover{border-color:var(--accent);color:var(--accent)}
-main{max-width:680px;margin:0 auto;padding:20px 16px}
+main{max-width:1080px;margin:0 auto;padding:24px 20px 48px}
+@media(min-width:900px){main{padding:32px 32px 56px}}
 .loading-state{text-align:center;padding:80px 20px;color:var(--muted)}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.err-box{text-align:center;padding:40px 18px;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1px solid var(--border)}
+.err-box{text-align:center;padding:40px 18px;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1px solid var(--border);max-width:680px;margin:20px auto}
 .err-box .ei{font-size:34px;margin-bottom:8px}
-.score-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:22px 16px;margin-bottom:14px;position:relative;overflow:hidden;isolation:isolate}
 
-/* Stadium atmosphere: floodlight cones from the top corners + faint pitch-line
-   stripes, all pure CSS — no photo asset, no extra API call. */
-.score-card::before{
-content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+/* ── HERO — full-bleed match banner, color-split home/away lighting,
+   crests large and only lightly blurred so they read as a real photographic
+   backdrop instead of a soft watermark. ── */
+.hero-wrap{width:100%;overflow:hidden}
+.hero{position:relative;isolation:isolate;overflow:hidden;min-height:280px;padding:36px 20px 28px;display:flex;flex-direction:column;justify-content:center}
+@media(min-width:640px){.hero{min-height:380px;padding:52px 40px 40px}}
+@media(min-width:1000px){.hero{min-height:440px}}
+.hero::before{
+content:'';position:absolute;inset:0;z-index:-2;
 background:
-conic-gradient(from 200deg at 0% 0%, rgba(255,255,255,.14), transparent 35deg),
-conic-gradient(from -20deg at 100% 0%, rgba(255,255,255,.14), transparent 35deg),
-radial-gradient(circle at 70% 20%, rgba(0,194,255,.14), transparent 60%),
-repeating-linear-gradient(100deg, rgba(255,255,255,.025) 0 2px, transparent 2px 34px);
-filter:blur(2px)}
-
-/* Blurred team crests as ambient watermarks behind each side of the card. */
-.crest-blur{position:absolute;top:50%;width:200px;height:200px;object-fit:contain;
-transform:translateY(-50%);filter:blur(28px) saturate(1.6);opacity:.30;z-index:0;pointer-events:none;
-transition:opacity .4s}
-.crest-blur.home{left:-60px}
-.crest-blur.away{right:-60px}
-
-/* When the match is live, the crest glow pulses gently and brightens — a quiet
-   "this is happening now" cue instead of a loud badge. */
-.score-card.is-live .crest-blur{opacity:.42;animation:crestPulse 2.6s ease-in-out infinite}
-@keyframes crestPulse{0%,100%{opacity:.32}50%{opacity:.5}}
-.score-card.is-live::after{
-content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-background:radial-gradient(circle at 50% 100%, rgba(232,48,58,.16), transparent 65%);
-animation:liveWash 3s ease-in-out infinite}
-@keyframes liveWash{0%,100%{opacity:.6}50%{opacity:1}}
-
-.score-card > *{position:relative;z-index:1}
-.league-line{text-align:center;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:16px;letter-spacing:.3px}
-.score-teams{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.score-team{text-align:center;flex:1;min-width:0}
-.score-logo{width:52px;height:52px;object-fit:contain;margin:0 auto 8px;display:block}
-.score-team-name{font-family:var(--fd);font-size:16px;font-weight:700;line-height:1.2}
-.score-mid{text-align:center;flex-shrink:0;padding:0 8px}
-.score-num{font-family:var(--fd);font-size:44px;font-weight:800;line-height:1}
-.score-status{margin-top:8px;font-size:12px;font-weight:700;color:var(--live)}
-.score-status.notlive{color:var(--muted)}
-.score-meta{text-align:center;margin-top:16px;font-size:11px;color:var(--muted)}
+linear-gradient(100deg, rgba(15,60,150,.55) 0%, rgba(15,60,150,.22) 40%, rgba(9,10,16,0) 50%, rgba(190,25,45,.22) 60%, rgba(190,25,45,.55) 100%),
+var(--bg)}
+.hero::after{
+content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+background:
+radial-gradient(ellipse 900px 400px at 50% -10%, rgba(0,0,0,0), rgba(4,5,9,.6) 100%),
+linear-gradient(0deg, rgba(4,5,9,.55), transparent 40%)}
+.hero-crest{position:absolute;top:50%;transform:translateY(-50%);width:min(48vw,320px);height:min(48vw,320px);object-fit:contain;opacity:.5;filter:blur(5px) saturate(1.35);pointer-events:none;z-index:0;transition:opacity .4s}
+.hero-crest.home{left:clamp(-60px,-6vw,-20px)}
+.hero-crest.away{right:clamp(-60px,-6vw,-20px)}
+.hero.is-live .hero-crest{opacity:.62;animation:crestPulse 2.6s ease-in-out infinite}
+@keyframes crestPulse{0%,100%{opacity:.5}50%{opacity:.72}}
+.hero-top{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;position:relative;z-index:2;flex-wrap:wrap}
+.hero-league{font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.4px;text-align:center}
+.live-pill{display:inline-flex;align-items:center;gap:5px;background:var(--live);color:#fff;font-size:11px;font-weight:800;letter-spacing:.6px;padding:3px 11px;border-radius:20px}
+.live-pill .dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1.3s infinite}
+@keyframes blink{50%{opacity:.25}}
+.hero-teams{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:780px;width:100%;margin:0 auto;position:relative;z-index:2}
+.hero-team{flex:1;text-align:center;min-width:0}
+.hero-logo{width:min(20vw,92px);height:min(20vw,92px);object-fit:contain;margin:0 auto 12px;display:block;filter:drop-shadow(0 8px 20px rgba(0,0,0,.55))}
+.hero-team-name{font-family:var(--fd);font-size:clamp(15px,3.6vw,25px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;line-height:1.15}
+.hero-mid{flex-shrink:0;text-align:center;padding:0 10px}
+.hero-score{font-family:var(--fd);font-weight:800;font-size:clamp(42px,8.5vw,68px);line-height:1;letter-spacing:.5px}
+.hero-status{margin-top:10px;font-size:13px;font-weight:700;color:var(--sub)}
+.hero-status.live{color:#ff6a76}
+.hero-meta{text-align:center;margin-top:22px;font-size:12px;color:var(--sub);position:relative;z-index:2}
 .section{margin-bottom:18px}
 .section-title{font-family:var(--fd);font-size:16px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .timeline{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
@@ -138,11 +135,12 @@ footer a{color:var(--accent)}
 </head>
 <body>
 <header>
-<div class="logo">Goal<span>Pulse</span></div>
+<div class="logo">Fote<span>Balle</span></div>
 <a class="back-btn" href="index.html">← Back to scores</a>
 </header>
-<main id="main"><div class="loading-state"><div class="spinner"></div><p>Loading match…</p></div></main>
-<footer><p>© 2026 GoalPulse · Data: <a href="https://www.api-football.com" target="_blank">API-Football</a></p></footer>
+<div id="hero" class="hero-wrap"><div class="loading-state"><div class="spinner"></div><p>Loading match…</p></div></div>
+<main id="main"></main>
+<footer><p>© 2026 FoteBalle · Data: <a href="https://www.api-football.com" target="_blank">API-Football</a></p></footer>
 <script>
 const params = new URLSearchParams(location.search);
 const fixtureId = params.get('id');
@@ -281,7 +279,9 @@ LOAD — base fixture + events, then render the shell + Overview
 ══════════════════════════════════════ */
 async function load() {
 const main = document.getElementById('main');
+const hero = document.getElementById('hero');
 if (!fixtureId) {
+hero.innerHTML = '';
 main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>No match selected.</p></div>`;
 return;
 }
@@ -291,7 +291,7 @@ apiFetch('fixtures', { id: fixtureId, timezone: userTZ }),
 apiFetch('fixtures/events', { fixture: fixtureId }),
 ]);
 const fx = fxData.response?.[0];
-if (!fx) { main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>Match not found.</p></div>`; return; }
+if (!fx) { hero.innerHTML = ''; main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>Match not found.</p></div>`; return; }
 
 currentFx = fx;
 currentEvents = (evData.response || []).slice().sort((a,b) => {
@@ -304,6 +304,7 @@ renderShell();
 
 scheduleLivePoll();
 } catch(e) {
+hero.innerHTML = '';
 main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p><strong>Could not load match</strong><br><br>${e.message}</p></div>`;
 }
 }
@@ -342,6 +343,7 @@ load();
 function renderShell() {
 const fx = currentFx;
 const isLive = LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short==='HT';
+const hero = document.getElementById('hero');
 const main = document.getElementById('main');
 
 const tabs = [
@@ -352,28 +354,33 @@ const tabs = [
 { id:'analytics', label:'Analytics' },
 ];
 
-main.innerHTML = `
-<div class="score-card${isLive?' is-live':''}">
-<img class="crest-blur home" src="${fx.teams.home.logo||''}" aria-hidden="true" onerror="this.style.display='none'">
-<img class="crest-blur away" src="${fx.teams.away.logo||''}" aria-hidden="true" onerror="this.style.display='none'">
-<div class="league-line">${fx.league.name} ${fx.league.round ? '· ' + fx.league.round : ''}</div>
-<div class="score-teams">
-<div class="score-team">
-<img src="${fx.teams.home.logo||''}" class="score-logo" onerror="this.style.display='none'">
-<div class="score-team-name">${fx.teams.home.name}</div>
+hero.innerHTML = `
+<div class="hero${isLive?' is-live':''}">
+<img class="hero-crest home" src="${fx.teams.home.logo||''}" aria-hidden="true" onerror="this.style.display='none'">
+<img class="hero-crest away" src="${fx.teams.away.logo||''}" aria-hidden="true" onerror="this.style.display='none'">
+<div class="hero-top">
+<span class="hero-league">${fx.league.name}${fx.league.round ? ' · ' + fx.league.round : ''}</span>
+${isLive ? `<span class="live-pill"><span class="dot"></span>LIVE</span>` : ''}
 </div>
-<div class="score-mid">
-<div class="score-num">${fx.goals.home ?? '–'} – ${fx.goals.away ?? '–'}</div>
-<div class="score-status ${isLive?'':'notlive'}">${minuteLabel(fx)}</div>
+<div class="hero-teams">
+<div class="hero-team">
+<img src="${fx.teams.home.logo||''}" class="hero-logo" onerror="this.style.display='none'">
+<div class="hero-team-name">${fx.teams.home.name}</div>
 </div>
-<div class="score-team">
-<img src="${fx.teams.away.logo||''}" class="score-logo" onerror="this.style.display='none'">
-<div class="score-team-name">${fx.teams.away.name}</div>
+<div class="hero-mid">
+<div class="hero-score">${fx.goals.home ?? '–'} - ${fx.goals.away ?? '–'}</div>
+<div class="hero-status${isLive?' live':''}">${minuteLabel(fx)}</div>
+</div>
+<div class="hero-team">
+<img src="${fx.teams.away.logo||''}" class="hero-logo" onerror="this.style.display='none'">
+<div class="hero-team-name">${fx.teams.away.name}</div>
 </div>
 </div>
-<div class="score-meta">${fx.fixture.venue?.name ? fx.fixture.venue.name + ' · ' : ''}${new Date(fx.fixture.date).toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'})}</div>
+<div class="hero-meta">${fx.fixture.venue?.name ? fx.fixture.venue.name + ' · ' : ''}${new Date(fx.fixture.date).toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'})}</div>
 </div>
+`;
 
+main.innerHTML = `
 <div class="mc-tabs" id="mcTabs">
 ${tabs.map(t => `<div class="mc-tab${t.id===activeTab?' active':''}" data-tab="${t.id}">${t.label}</div>`).join('')}
 </div>
