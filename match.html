@@ -278,7 +278,7 @@ tab is visible. Slowed slightly from 20s → 25s, and a backgrounded tab
 stops polling entirely instead of quietly burning requests. Coming back
 to a live match refreshes immediately so the score isn't stale.
 ══════════════════════════════════════ */
-const LIVE_POLL_MS = 25000;
+const LIVE_POLL_MS = 300000; // 5 min — matches the proxy's cache TTL, no point polling faster than data actually refreshes
 let liveTimer = null;
 
 function isCurrentlyLive(fx) {

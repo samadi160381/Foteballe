@@ -627,7 +627,7 @@ entirely instead of silently burning API requests nobody is looking at.
 When the user comes back, if we've missed a cycle we refresh right away
 so the data isn't stale, then resume the normal interval.
 ══════════════════════════════════════ */
-const POLL_MS = 60000;
+const POLL_MS = 300000; // 5 min — matches the proxy's cache TTL, no point polling faster than data actually refreshes
 let pollTimer = null;
 let lastPollAt = Date.now();
 
