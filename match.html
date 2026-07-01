@@ -8,7 +8,14 @@
 <style>
 :root{--bg:#0d0f14;--surface:#161a24;--card:#1c2132;--border:#252d42;--live:#e8303a;--accent:#00c2ff;--green:#00e676;--muted:#6b7592;--text:#e4e8f4;--sub:#9ca3be;--radius:10px;--fd:'Barlow Condensed',sans-serif;--fb:'Inter',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.5;min-height:100vh}
+body{
+background-color:var(--bg);
+background-image:
+radial-gradient(ellipse 900px 600px at 15% -10%, rgba(0,194,255,.10), transparent 55%),
+radial-gradient(ellipse 800px 700px at 100% 10%, rgba(232,48,58,.08), transparent 55%),
+radial-gradient(ellipse 700px 500px at 50% 120%, rgba(0,230,118,.06), transparent 60%);
+background-repeat:no-repeat;background-attachment:fixed;
+color:var(--text);font-family:var(--fb);font-size:14px;line-height:1.5;min-height:100vh}
 a{color:inherit;text-decoration:none}button{cursor:pointer;border:none;background:none;font-family:inherit}
 header{position:sticky;top:0;z-index:200;background:rgba(13,15,20,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:12px;height:54px}
 .logo{font-family:var(--fd);font-size:26px;font-weight:800;white-space:nowrap}.logo span{color:var(--accent)}
@@ -20,8 +27,37 @@ main{max-width:680px;margin:0 auto;padding:20px 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-box{text-align:center;padding:40px 18px;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1px solid var(--border)}
 .err-box .ei{font-size:34px;margin-bottom:8px}
-.score-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:22px 16px;margin-bottom:14px;position:relative;overflow:hidden}
-.score-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(0,194,255,.12),transparent 60%);pointer-events:none}
+.score-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:22px 16px;margin-bottom:14px;position:relative;overflow:hidden;isolation:isolate}
+
+/* Stadium atmosphere: floodlight cones from the top corners + faint pitch-line
+   stripes, all pure CSS — no photo asset, no extra API call. */
+.score-card::before{
+content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+background:
+conic-gradient(from 200deg at 0% 0%, rgba(255,255,255,.14), transparent 35deg),
+conic-gradient(from -20deg at 100% 0%, rgba(255,255,255,.14), transparent 35deg),
+radial-gradient(circle at 70% 20%, rgba(0,194,255,.14), transparent 60%),
+repeating-linear-gradient(100deg, rgba(255,255,255,.025) 0 2px, transparent 2px 34px);
+filter:blur(2px)}
+
+/* Blurred team crests as ambient watermarks behind each side of the card. */
+.crest-blur{position:absolute;top:50%;width:200px;height:200px;object-fit:contain;
+transform:translateY(-50%);filter:blur(28px) saturate(1.6);opacity:.30;z-index:0;pointer-events:none;
+transition:opacity .4s}
+.crest-blur.home{left:-60px}
+.crest-blur.away{right:-60px}
+
+/* When the match is live, the crest glow pulses gently and brightens — a quiet
+   "this is happening now" cue instead of a loud badge. */
+.score-card.is-live .crest-blur{opacity:.42;animation:crestPulse 2.6s ease-in-out infinite}
+@keyframes crestPulse{0%,100%{opacity:.32}50%{opacity:.5}}
+.score-card.is-live::after{
+content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+background:radial-gradient(circle at 50% 100%, rgba(232,48,58,.16), transparent 65%);
+animation:liveWash 3s ease-in-out infinite}
+@keyframes liveWash{0%,100%{opacity:.6}50%{opacity:1}}
+
+.score-card > *{position:relative;z-index:1}
 .league-line{text-align:center;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:16px;letter-spacing:.3px}
 .score-teams{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .score-team{text-align:center;flex:1;min-width:0}
@@ -317,7 +353,9 @@ const tabs = [
 ];
 
 main.innerHTML = `
-<div class="score-card">
+<div class="score-card${isLive?' is-live':''}">
+<img class="crest-blur home" src="${fx.teams.home.logo||''}" aria-hidden="true" onerror="this.style.display='none'">
+<img class="crest-blur away" src="${fx.teams.away.logo||''}" aria-hidden="true" onerror="this.style.display='none'">
 <div class="league-line">${fx.league.name} ${fx.league.round ? '· ' + fx.league.round : ''}</div>
 <div class="score-teams">
 <div class="score-team">
