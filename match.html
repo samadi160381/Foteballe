@@ -20,7 +20,7 @@ main{max-width:680px;margin:0 auto;padding:20px 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-box{text-align:center;padding:40px 18px;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1px solid var(--border)}
 .err-box .ei{font-size:34px;margin-bottom:8px}
-.score-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:22px 16px;margin-bottom:18px;position:relative;overflow:hidden}
+.score-card{background:linear-gradient(135deg,#0f1b36,#1a0f2e);border:1px solid var(--border);border-radius:var(--radius);padding:22px 16px;margin-bottom:14px;position:relative;overflow:hidden}
 .score-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(0,194,255,.12),transparent 60%);pointer-events:none}
 .league-line{text-align:center;font-size:12px;color:var(--accent);font-weight:600;margin-bottom:16px;letter-spacing:.3px}
 .score-teams{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -37,6 +37,8 @@ main{max-width:680px;margin:0 auto;padding:20px 16px}
 .timeline{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .tl-row{display:grid;grid-template-columns:38px 1fr 22px 1fr;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--border);font-size:12.5px}
 .tl-row:last-child{border-bottom:none}
+.tl-row-c{display:grid;grid-template-columns:38px 1fr 22px;align-items:center;gap:8px;padding:10px 13px;border-bottom:1px solid var(--border);font-size:12.5px}
+.tl-row-c:last-child{border-bottom:none}
 .tl-min{font-weight:700;color:var(--accent);text-align:right}
 .tl-icon{text-align:center;font-size:14px}
 .tl-home{text-align:right}
@@ -48,6 +50,54 @@ main{max-width:680px;margin:0 auto;padding:20px 16px}
 .no-events{padding:18px;text-align:center;color:var(--muted);font-size:12.5px}
 footer{border-top:1px solid var(--border);padding:16px;text-align:center;color:var(--muted);font-size:12px;margin-top:24px}
 footer a{color:var(--accent)}
+
+/* ── Match Center tabs (Overview / Timeline / Lineups / Stats / Analytics) ── */
+.mc-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.mc-tabs::-webkit-scrollbar{display:none}
+.mc-tab{padding:9px 14px;font-size:13.5px;font-weight:600;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;cursor:pointer;transition:color .15s}
+.mc-tab:hover{color:var(--text)}
+.mc-tab.active{color:var(--live);border-bottom-color:var(--live)}
+.tab-spinner{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:30px auto}
+
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.info-card-head{padding:10px 14px;background:var(--surface);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--sub);text-transform:uppercase;border-bottom:1px solid var(--border)}
+.info-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-icon{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.info-label{font-size:11px;color:var(--muted)}
+.info-val{font-size:13.5px;font-weight:700;margin-top:1px}
+.empty-note{padding:24px 16px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.7}
+.empty-note .ic{font-size:20px;margin-right:6px;vertical-align:middle}
+
+.lineup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.lineup-grid{grid-template-columns:1fr}}
+.xi-head{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border)}
+.xi-head img{width:16px;height:16px;object-fit:contain}
+.xi-head .fm{margin-left:auto;font-size:11px;color:var(--muted)}
+.xi-player{display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid rgba(37,45,66,.5);font-size:12.5px}
+.xi-player .num{width:18px;color:var(--muted);font-weight:700;font-size:11px;flex-shrink:0}
+.bench-label{padding:8px 14px;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);background:rgba(255,255,255,.02)}
+.coach-line{padding:9px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+
+.stat-row{padding:9px 14px;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-nums{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:5px}
+.stat-label{color:var(--muted);font-weight:500;font-size:11px}
+.stat-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;display:flex}
+.stat-bar .h{background:var(--accent)}.stat-bar .a{background:var(--green)}
+
+.h2h-summary{display:flex;align-items:center;justify-content:space-around;padding:16px 14px;text-align:center}
+.h2h-num{font-family:var(--fd);font-size:28px;font-weight:800}
+.h2h-lbl{font-size:10px;color:var(--muted);letter-spacing:.4px;margin-top:2px}
+.form-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.form-row:last-child{border-bottom:none}
+.form-dots{display:flex;gap:4px;margin-left:auto}
+.f-dot{width:18px;height:18px;border-radius:4px;font-size:10px;font-weight:800;display:grid;place-items:center;flex-shrink:0}
+.f-dot.W{background:var(--green);color:#06210f}.f-dot.D{background:var(--muted);color:#0d0f14}.f-dot.L{background:var(--live);color:#fff}
+.meeting-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px}
+.meeting-row:last-child{border-bottom:none}
+.meeting-row .dt{color:var(--muted);width:60px;flex-shrink:0;font-size:10.5px}
+.meeting-row .sc{font-weight:700;margin-left:auto}
 </style>
 </head>
 <body>
@@ -93,6 +143,10 @@ if (LIVE_CODES.includes(s)) return (el!=null ? el+"'" : 'Live') + ' · Live';
 return new Date(fx.fixture.date).toLocaleString([], {weekday:'short', hour:'2-digit', minute:'2-digit'});
 }
 
+function isLiveOrPast(fx) {
+return LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short==='HT' || FINISHED_CODES.includes(fx.fixture.status.short);
+}
+
 function eventIcon(ev) {
 if (ev.type === 'Goal') {
 if (ev.detail === 'Own Goal') return '⚽🔴';
@@ -121,32 +175,7 @@ detail = `${ev.player?.name || ''} <span style="color:var(--live)">↓</span>`;
 return { min, player, detail };
 }
 
-async function load() {
-const main = document.getElementById('main');
-if (!fixtureId) {
-main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>No match selected.</p></div>`;
-return;
-}
-try {
-const [fxData, evData] = await Promise.all([
-apiFetch('fixtures', { id: fixtureId, timezone: userTZ }),
-apiFetch('fixtures/events', { fixture: fixtureId }),
-]);
-const fx = fxData.response?.[0];
-if (!fx) { main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>Match not found.</p></div>`; return; }
-
-const events = (evData.response || []).slice().sort((a,b) => {
-const am = (a.time.elapsed||0) + (a.time.extra||0)/100;
-const bm = (b.time.elapsed||0) + (b.time.extra||0)/100;
-return am - bm;
-});
-
-const isLive = LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short==='HT';
-const goals = events.filter(e => e.type === 'Goal');
-const cards = events.filter(e => e.type === 'Card');
-const subs = events.filter(e => e.type === 'subst');
-
-function renderGroup(title, icon, evs) {
+function renderGroup(title, icon, evs, fx) {
 if (!evs.length) return '';
 const rows = evs.map(ev => {
 const {min, player, detail} = eventLine(ev);
@@ -163,6 +192,99 @@ return `<div class="section">
 <div class="timeline">${rows}</div>
 </div>`;
 }
+
+/* Condensed events feed used on the Overview tab — a few most recent items only */
+function condensedEventsHTML(events, fx) {
+if (!events.length) return '';
+const rows = events.slice(0, 8).map(ev => {
+const min = (ev.time.elapsed ?? '') + (ev.time.extra ? '+' + ev.time.extra : '') + "'";
+const teamName = ev.team.id === fx.teams.home.id ? fx.teams.home.name : fx.teams.away.name;
+let text = ev.player?.name || 'Unknown';
+if (ev.type === 'subst') text = `${ev.assist?.name || ev.player?.name || '?'} ↑ · ${ev.player?.name || '?'} ↓`;
+return `<div class="tl-row-c">
+<div class="tl-min">${min}</div>
+<div><div class="tl-player">${text}</div><div class="tl-detail">${teamName}</div></div>
+<div class="tl-icon">${eventIcon(ev)}</div>
+</div>`;
+}).join('');
+return `<div class="timeline">${rows}</div>`;
+}
+
+/* Stats rows shared by Overview (curated) and the Stats tab (full list) */
+function statsRowsHTML(statsArr, fx, full) {
+if (!statsArr || statsArr.length < 2) return '';
+const homeStats = statsArr.find(s => s.team.id === fx.teams.home.id)?.statistics || [];
+const awayStats = statsArr.find(s => s.team.id === fx.teams.away.id)?.statistics || [];
+if (!homeStats.length && !awayStats.length) return '';
+const curated = ['Shots on Goal','Total Shots','Corner Kicks','Fouls','Ball Possession','Yellow Cards','Red Cards'];
+const types = full ? [...new Set([...homeStats.map(s=>s.type), ...awayStats.map(s=>s.type)])] : curated;
+const rows = types.map(type => {
+const h = homeStats.find(s => s.type === type)?.value;
+const a = awayStats.find(s => s.type === type)?.value;
+if (h == null && a == null) return '';
+const hv = parseFloat(h) || 0, av = parseFloat(a) || 0;
+const tot = (hv + av) || 1;
+return `<div class="stat-row">
+<div class="stat-nums"><span>${h ?? 0}</span><span class="stat-label">${type}</span><span>${a ?? 0}</span></div>
+<div class="stat-bar"><div class="h" style="width:${hv/tot*100}%"></div><div class="a" style="width:${av/tot*100}%"></div></div>
+</div>`;
+}).filter(Boolean).join('');
+return rows;
+}
+
+/* ══════════════════════════════════════
+STATE
+══════════════════════════════════════ */
+let currentFx = null;
+let currentEvents = [];
+let activeTab = 'overview';
+const tabCache = {}; // stats, lineups, h2h, homeForm, awayForm — fetched lazily, once each
+
+/* ══════════════════════════════════════
+LOAD — base fixture + events, then render the shell + Overview
+══════════════════════════════════════ */
+async function load() {
+const main = document.getElementById('main');
+if (!fixtureId) {
+main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>No match selected.</p></div>`;
+return;
+}
+try {
+const [fxData, evData] = await Promise.all([
+apiFetch('fixtures', { id: fixtureId, timezone: userTZ }),
+apiFetch('fixtures/events', { fixture: fixtureId }),
+]);
+const fx = fxData.response?.[0];
+if (!fx) { main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p>Match not found.</p></div>`; return; }
+
+currentFx = fx;
+currentEvents = (evData.response || []).slice().sort((a,b) => {
+const am = (a.time.elapsed||0) + (a.time.extra||0)/100;
+const bm = (b.time.elapsed||0) + (b.time.extra||0)/100;
+return am - bm;
+});
+
+renderShell();
+
+const isLive = LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short==='HT';
+if (isLive) setTimeout(load, 20000);
+} catch(e) {
+main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p><strong>Could not load match</strong><br><br>${e.message}</p></div>`;
+}
+}
+
+function renderShell() {
+const fx = currentFx;
+const isLive = LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short==='HT';
+const main = document.getElementById('main');
+
+const tabs = [
+{ id:'overview', label:'Overview' },
+{ id:'timeline', label:'Timeline' },
+{ id:'lineups', label:'Lineups' },
+{ id:'stats', label:'Stats' },
+{ id:'analytics', label:'Analytics' },
+];
 
 main.innerHTML = `
 <div class="score-card">
@@ -184,16 +306,206 @@ main.innerHTML = `
 <div class="score-meta">${fx.fixture.venue?.name ? fx.fixture.venue.name + ' · ' : ''}${new Date(fx.fixture.date).toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'})}</div>
 </div>
 
-${renderGroup('Goals', '⚽', goals)}
-${renderGroup('Cards', '🟨', cards)}
-${renderGroup('Substitutions', '🔄', subs)}
-${!events.length ? '<div class="no-events">No match events yet.</div>' : ''}
+<div class="mc-tabs" id="mcTabs">
+${tabs.map(t => `<div class="mc-tab${t.id===activeTab?' active':''}" data-tab="${t.id}">${t.label}</div>`).join('')}
+</div>
+<div id="tabBody"><div class="tab-spinner"></div></div>
 `;
 
-if (isLive) setTimeout(load, 20000);
-} catch(e) {
-main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p><strong>Could not load match</strong><br><br>${e.message}</p></div>`;
+document.querySelectorAll('.mc-tab').forEach(el => {
+el.onclick = () => {
+if (el.dataset.tab === activeTab) return;
+document.querySelectorAll('.mc-tab').forEach(x => x.classList.remove('active'));
+el.classList.add('active');
+activeTab = el.dataset.tab;
+renderTab(activeTab);
+};
+});
+
+renderTab(activeTab);
 }
+
+/* ══════════════════════════════════════
+TAB DISPATCH
+══════════════════════════════════════ */
+function renderTab(tab) {
+if (tab === 'overview') return renderOverview();
+if (tab === 'timeline') return renderTimeline();
+if (tab === 'lineups') return renderLineups();
+if (tab === 'stats') return renderStats();
+if (tab === 'analytics') return renderAnalytics();
+}
+
+/* ── OVERVIEW ── */
+async function renderOverview() {
+const body = document.getElementById('tabBody');
+const fx = currentFx;
+body.innerHTML = `<div class="tab-spinner"></div>`;
+
+if (!tabCache.stats) {
+try { tabCache.stats = (await apiFetch('fixtures/statistics', { fixture: fixtureId })).response || []; }
+catch { tabCache.stats = []; }
+}
+if (activeTab !== 'overview') return; // user switched tabs while this was loading
+
+const venue = fx.fixture.venue?.name
+? fx.fixture.venue.name + (fx.fixture.venue.city ? ', ' + fx.fixture.venue.city : '')
+: 'Not available';
+const referee = fx.fixture.referee || 'Not available';
+const dateStr = new Date(fx.fixture.date).toLocaleDateString([], { month:'long', day:'numeric', year:'numeric' });
+
+const statsHTML = statsRowsHTML(tabCache.stats, fx, false);
+const eventsHTML = condensedEventsHTML(currentEvents, fx);
+
+body.innerHTML = `
+<div class="info-card">
+<div class="info-card-head">Match Info</div>
+<div class="info-row"><span class="info-icon">🏟️</span><div><div class="info-label">Stadium</div><div class="info-val">${venue}</div></div></div>
+<div class="info-row"><span class="info-icon">🟨</span><div><div class="info-label">Referee</div><div class="info-val">${referee}</div></div></div>
+<div class="info-row"><span class="info-icon">📅</span><div><div class="info-label">Date</div><div class="info-val">${dateStr}</div></div></div>
+</div>
+<div class="info-card">
+<div class="info-card-head">Team Statistics</div>
+${statsHTML || `<div class="empty-note"><span class="ic">📊</span>Detailed statistics aren't provided by the data source for this fixture.</div>`}
+</div>
+<div class="info-card">
+<div class="info-card-head">Match Events</div>
+${eventsHTML || `<div class="empty-note"><span class="ic">📭</span>No match events recorded yet.</div>`}
+</div>
+`;
+}
+
+/* ── TIMELINE ── */
+function renderTimeline() {
+const body = document.getElementById('tabBody');
+const fx = currentFx;
+const goals = currentEvents.filter(e => e.type === 'Goal');
+const cards = currentEvents.filter(e => e.type === 'Card');
+const subs = currentEvents.filter(e => e.type === 'subst');
+const html = `${renderGroup('Goals','⚽',goals,fx)}${renderGroup('Cards','🟨',cards,fx)}${renderGroup('Substitutions','🔄',subs,fx)}`;
+body.innerHTML = currentEvents.length
+? html
+: `<div class="info-card"><div class="empty-note"><span class="ic">⏱️</span>No timeline data has been published for this fixture yet.<br>Check back closer to kick-off or during the match.</div></div>`;
+}
+
+/* ── LINEUPS ── */
+async function renderLineups() {
+const body = document.getElementById('tabBody');
+const fx = currentFx;
+body.innerHTML = `<div class="tab-spinner"></div>`;
+
+if (!tabCache.lineups) {
+try { tabCache.lineups = (await apiFetch('fixtures/lineups', { fixture: fixtureId })).response || []; }
+catch { tabCache.lineups = []; }
+}
+if (activeTab !== 'lineups') return;
+
+const data = tabCache.lineups;
+if (!data.length || !data.some(t => (t.startXI||[]).length)) {
+const hint = !isLiveOrPast(fx) ? '<br>Lineups are usually published shortly before kick-off.' : '';
+body.innerHTML = `<div class="info-card"><div class="empty-note"><span class="ic">📋</span>Lineups aren't available for this fixture yet.${hint}</div></div>`;
+return;
+}
+
+const sideHTML = (t) => {
+const startRows = (t.startXI||[]).map(p => `<div class="xi-player"><span class="num">${p.player.number ?? ''}</span>${p.player.name}${p.player.pos ? ` <span style="color:var(--muted);font-size:10.5px">· ${p.player.pos}</span>` : ''}</div>`).join('');
+const benchRows = (t.substitutes||[]).length
+? `<div class="bench-label">SUBSTITUTES</div>${t.substitutes.map(p => `<div class="xi-player"><span class="num">${p.player.number ?? ''}</span>${p.player.name}</div>`).join('')}`
+: '';
+const coachLine = t.coach?.name ? `<div class="coach-line">Coach: ${t.coach.name}</div>` : '';
+return `<div class="info-card">
+<div class="xi-head"><img src="${t.team.logo||''}" onerror="this.style.display='none'"><b>${t.team.name}</b><span class="fm">${t.formation||''}</span></div>
+${startRows}
+${benchRows}
+${coachLine}
+</div>`;
+};
+
+body.innerHTML = `<div class="lineup-grid">${data.map(sideHTML).join('')}</div>`;
+}
+
+/* ── STATS ── */
+async function renderStats() {
+const body = document.getElementById('tabBody');
+const fx = currentFx;
+body.innerHTML = `<div class="tab-spinner"></div>`;
+
+if (!tabCache.stats) {
+try { tabCache.stats = (await apiFetch('fixtures/statistics', { fixture: fixtureId })).response || []; }
+catch { tabCache.stats = []; }
+}
+if (activeTab !== 'stats') return;
+
+const rows = statsRowsHTML(tabCache.stats, fx, true);
+body.innerHTML = rows
+? `<div class="info-card"><div class="info-card-head">Match Statistics</div>${rows}</div>`
+: `<div class="info-card"><div class="empty-note"><span class="ic">📊</span>Detailed statistics aren't provided by the data source for this fixture.</div></div>`;
+}
+
+/* ── ANALYTICS — real head-to-head + last-5 form, both pulled live ── */
+async function renderAnalytics() {
+const body = document.getElementById('tabBody');
+const fx = currentFx;
+body.innerHTML = `<div class="tab-spinner"></div>`;
+
+try {
+if (!tabCache.h2h) tabCache.h2h = (await apiFetch('fixtures/headtohead', { h2h: `${fx.teams.home.id}-${fx.teams.away.id}`, last: 10 })).response || [];
+if (!tabCache.homeForm) tabCache.homeForm = (await apiFetch('fixtures', { team: fx.teams.home.id, last: 5 })).response || [];
+if (!tabCache.awayForm) tabCache.awayForm = (await apiFetch('fixtures', { team: fx.teams.away.id, last: 5 })).response || [];
+} catch(e) {
+if (activeTab !== 'analytics') return;
+body.innerHTML = `<div class="info-card"><div class="empty-note"><span class="ic">⚠️</span>Couldn't load analytics (${e.message}).</div></div>`;
+return;
+}
+if (activeTab !== 'analytics') return;
+
+const h2h = tabCache.h2h;
+let homeWins = 0, awayWins = 0, draws = 0, totalGoals = 0;
+h2h.forEach(m => {
+const hg = m.goals.home ?? 0, ag = m.goals.away ?? 0;
+totalGoals += hg + ag;
+const fxHomeIsMatchHome = m.teams.home.id === fx.teams.home.id;
+const homeScore = fxHomeIsMatchHome ? hg : ag;
+const awayScore = fxHomeIsMatchHome ? ag : hg;
+if (homeScore > awayScore) homeWins++;
+else if (awayScore > homeScore) awayWins++;
+else draws++;
+});
+
+const h2hHTML = h2h.length ? `
+<div class="info-card">
+<div class="info-card-head">Head-to-Head (last ${h2h.length} meetings)</div>
+<div class="h2h-summary">
+<div><div class="h2h-num" style="color:var(--accent)">${homeWins}</div><div class="h2h-lbl">${fx.teams.home.name} wins</div></div>
+<div><div class="h2h-num" style="color:var(--muted)">${draws}</div><div class="h2h-lbl">Draws</div></div>
+<div><div class="h2h-num" style="color:var(--green)">${awayWins}</div><div class="h2h-lbl">${fx.teams.away.name} wins</div></div>
+</div>
+<div style="padding:0 14px 12px;font-size:11px;color:var(--muted)">Total goals across these meetings: ${totalGoals}</div>
+</div>
+<div class="info-card">
+<div class="info-card-head">Recent Meetings</div>
+${h2h.slice(0,5).map(m => `<div class="meeting-row"><span class="dt">${new Date(m.fixture.date).toLocaleDateString([], {month:'short',day:'numeric',year:'2-digit'})}</span><span>${m.teams.home.name} vs ${m.teams.away.name}</span><span class="sc">${m.goals.home ?? '–'}–${m.goals.away ?? '–'}</span></div>`).join('')}
+</div>` : `<div class="info-card"><div class="empty-note"><span class="ic">📈</span>No previous meetings on record.</div></div>`;
+
+const formRow = (team, matches) => {
+if (!matches.length) return `<div class="form-row"><b>${team.name}</b><span class="form-dots"><span style="color:var(--muted);font-size:11px">No recent form data</span></span></div>`;
+const dots = matches.slice(-5).map(m => {
+const isHome = m.teams.home.id === team.id;
+const gf = isHome ? m.goals.home : m.goals.away;
+const ga = isHome ? m.goals.away : m.goals.home;
+const r = gf > ga ? 'W' : gf < ga ? 'L' : 'D';
+return `<span class="f-dot ${r}">${r}</span>`;
+}).join('');
+return `<div class="form-row"><b>${team.name}</b><span class="form-dots">${dots}</span></div>`;
+};
+
+body.innerHTML = `
+<div class="info-card">
+<div class="info-card-head">Recent Form (last 5)</div>
+${formRow(fx.teams.home, tabCache.homeForm)}
+${formRow(fx.teams.away, tabCache.awayForm)}
+</div>
+${h2hHTML}`;
 }
 
 load();
