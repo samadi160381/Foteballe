@@ -266,12 +266,42 @@ return am - bm;
 
 renderShell();
 
-const isLive = LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short==='HT';
-if (isLive) setTimeout(load, 20000);
+scheduleLivePoll();
 } catch(e) {
 main.innerHTML = `<div class="err-box"><div class="ei">⚠️</div><p><strong>Could not load match</strong><br><br>${e.message}</p></div>`;
 }
 }
+
+/* ══════════════════════════════════════
+POLLING — only while the match is actually live, and only while the
+tab is visible. Slowed slightly from 20s → 25s, and a backgrounded tab
+stops polling entirely instead of quietly burning requests. Coming back
+to a live match refreshes immediately so the score isn't stale.
+══════════════════════════════════════ */
+const LIVE_POLL_MS = 25000;
+let liveTimer = null;
+
+function isCurrentlyLive(fx) {
+return LIVE_CODES.includes(fx.fixture.status.short) || fx.fixture.status.short === 'HT';
+}
+
+function scheduleLivePoll() {
+if (liveTimer) clearTimeout(liveTimer);
+if (!currentFx || !isCurrentlyLive(currentFx)) return; // match isn't live — nothing to poll
+liveTimer = setTimeout(() => {
+if (document.visibilityState === 'visible') {
+load();
+} else {
+scheduleLivePoll(); // keep the loop alive, just skip the fetch while hidden
+}
+}, LIVE_POLL_MS);
+}
+
+document.addEventListener('visibilitychange', () => {
+if (document.visibilityState === 'visible' && currentFx && isCurrentlyLive(currentFx)) {
+load();
+}
+});
 
 function renderShell() {
 const fx = currentFx;

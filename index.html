@@ -620,14 +620,41 @@ render();
 }
 document.getElementById('searchInput').addEventListener('input', e=>{searchTerm=e.target.value.trim();render();});
 
-/* Refresh from the API every 60s — this re-pulls the real elapsed/extra-time
-clock from API-Football rather than estimating it client-side. */
-setInterval(()=>loadMatches(activeDate), 60000);
+/* ══════════════════════════════════════
+POLLING — only refresh while the tab is actually visible.
+A background tab (or one the user switched away from) stops polling
+entirely instead of silently burning API requests nobody is looking at.
+When the user comes back, if we've missed a cycle we refresh right away
+so the data isn't stale, then resume the normal interval.
+══════════════════════════════════════ */
+const POLL_MS = 60000;
+let pollTimer = null;
+let lastPollAt = Date.now();
+
+function schedulePoll() {
+if (pollTimer) clearTimeout(pollTimer);
+pollTimer = setTimeout(() => {
+if (document.visibilityState === 'visible') {
+loadMatches(activeDate);
+lastPollAt = Date.now();
+}
+schedulePoll();
+}, POLL_MS);
+}
+
+document.addEventListener('visibilitychange', () => {
+if (document.visibilityState === 'visible' && Date.now() - lastPollAt > POLL_MS) {
+loadMatches(activeDate);
+lastPollAt = Date.now();
+schedulePoll();
+}
+});
 
 /* ── INIT ── */
 buildLeagueSidebar();
 buildDateStrip();
 loadMatches(activeDate);
+schedulePoll();
 </script>
 </body>
 </html>
